@@ -116,6 +116,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#data-availability" id="toc-data-availability" class="nav-link" data-scroll-target="#data-availability">Data availability</a></li>
   <li><a href="#zeros-and-duplicates" id="toc-zeros-and-duplicates" class="nav-link" data-scroll-target="#zeros-and-duplicates">Zeros and duplicates</a></li>
   <li><a href="#outliers" id="toc-outliers" class="nav-link" data-scroll-target="#outliers">Outliers</a></li>
+  <li><a href="#denominators" id="toc-denominators" class="nav-link" data-scroll-target="#denominators">Denominators</a></li>
   <li><a href="#correlations" id="toc-correlations" class="nav-link" data-scroll-target="#correlations">Correlations</a></li>
   </ul></li>
   <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a>
@@ -268,9 +269,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <pre><code>character(0)</code></pre>
 </div>
 </div>
-<p>OK so everything looks consistent. There is one last thing I found which causes a problem. One of the categories “Desplazamento” doesn’t have any indicators underneath it so we need to remove it.</p>
+<p>OK so everything looks consistent. There is one last thing I found which causes a problem. One of the categories “Desplazamento” doesn’t have any indicators underneath it so we need to remove it. And, since this is the only categoria in the “Mov_Hum” dimension, that dimension also has to be removed.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>imeta <span class="ot">&lt;-</span> imeta[imeta<span class="sc">$</span>iCode <span class="sc">!=</span> <span class="st">"Desplaz"</span>, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>imeta <span class="ot">&lt;-</span> imeta[<span class="sc">!</span>(imeta<span class="sc">$</span>iCode <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Desplaz"</span>, <span class="st">"Mov_Hum"</span>)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>This means that now we can go ahead and enter the data into COINr, and assemble a “coin”. We will also clean up the environment.</p>
 <div class="cell">
@@ -394,98 +395,68 @@ Data sets:
 </tr>
 <tr class="even">
 <td style="text-align: left;">A.M.2</td>
-<td style="text-align: right;">3.24</td>
-<td style="text-align: right;">13.20</td>
+<td style="text-align: right;">2.14</td>
+<td style="text-align: right;">5.82</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">A.M.4</td>
-<td style="text-align: right;">4.10</td>
-<td style="text-align: right;">24.30</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">S.A.2</td>
-<td style="text-align: right;">3.32</td>
-<td style="text-align: right;">16.50</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">S.A.3</td>
-<td style="text-align: right;">2.67</td>
-<td style="text-align: right;">10.80</td>
-</tr>
-<tr class="even">
 <td style="text-align: left;">S.A.4</td>
 <td style="text-align: right;">9.12</td>
 <td style="text-align: right;">101.00</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">S.E.1</td>
-<td style="text-align: right;">2.74</td>
-<td style="text-align: right;">14.70</td>
-</tr>
 <tr class="even">
 <td style="text-align: left;">S.E.2</td>
-<td style="text-align: right;">3.73</td>
-<td style="text-align: right;">20.00</td>
+<td style="text-align: right;">2.39</td>
+<td style="text-align: right;">8.28</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">S.E.3</td>
-<td style="text-align: right;">3.43</td>
-<td style="text-align: right;">17.90</td>
+<td style="text-align: left;">S.G.1</td>
+<td style="text-align: right;">11.00</td>
+<td style="text-align: right;">150.00</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">S.G.3</td>
+<td style="text-align: right;">3.11</td>
+<td style="text-align: right;">14.80</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;">S.G.4</td>
-<td style="text-align: right;">3.71</td>
-<td style="text-align: right;">18.00</td>
+<td style="text-align: right;">14.30</td>
+<td style="text-align: right;">227.00</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">S.G.5</td>
-<td style="text-align: right;">8.70</td>
-<td style="text-align: right;">108.00</td>
+<td style="text-align: right;">6.35</td>
+<td style="text-align: right;">60.00</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">S.G.6</td>
-<td style="text-align: right;">6.25</td>
-<td style="text-align: right;">46.50</td>
+<td style="text-align: right;">11.50</td>
+<td style="text-align: right;">149.00</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">S.G.7</td>
-<td style="text-align: right;">10.50</td>
-<td style="text-align: right;">142.00</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">S.T.1</td>
-<td style="text-align: right;">2.70</td>
-<td style="text-align: right;">11.90</td>
+<td style="text-align: right;">8.12</td>
+<td style="text-align: right;">75.20</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">S.T.2</td>
-<td style="text-align: right;">4.06</td>
-<td style="text-align: right;">23.30</td>
+<td style="text-align: left;">S.G.8</td>
+<td style="text-align: right;">9.46</td>
+<td style="text-align: right;">115.00</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">S.T.4</td>
-<td style="text-align: right;">2.42</td>
-<td style="text-align: right;">8.25</td>
-</tr>
-<tr class="odd">
 <td style="text-align: left;">C.E.4</td>
 <td style="text-align: right;">9.10</td>
 <td style="text-align: right;">95.10</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">C.E.6</td>
 <td style="text-align: right;">2.62</td>
 <td style="text-align: right;">8.09</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">C.E.8</td>
-<td style="text-align: right;">3.14</td>
-<td style="text-align: right;">14.30</td>
-</tr>
 <tr class="even">
 <td style="text-align: left;">C.E.9</td>
-<td style="text-align: right;">5.75</td>
-<td style="text-align: right;">55.70</td>
+<td style="text-align: right;">4.82</td>
+<td style="text-align: right;">39.80</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">C.E.10</td>
@@ -494,39 +465,34 @@ Data sets:
 </tr>
 <tr class="even">
 <td style="text-align: left;">C.E.11</td>
-<td style="text-align: right;">4.17</td>
-<td style="text-align: right;">22.40</td>
+<td style="text-align: right;">2.45</td>
+<td style="text-align: right;">8.26</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">C.I.5</td>
-<td style="text-align: right;">3.47</td>
-<td style="text-align: right;">19.20</td>
+<td style="text-align: right;">-2.20</td>
+<td style="text-align: right;">5.17</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">C.I.6</td>
-<td style="text-align: right;">4.30</td>
-<td style="text-align: right;">29.00</td>
+<td style="text-align: left;">C.I.7</td>
+<td style="text-align: right;">18.10</td>
+<td style="text-align: right;">333.00</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">C.I.7</td>
-<td style="text-align: right;">5.23</td>
-<td style="text-align: right;">44.50</td>
-</tr>
-<tr class="even">
 <td style="text-align: left;">C.J.2</td>
 <td style="text-align: right;">10.90</td>
 <td style="text-align: right;">157.00</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">C.S.4</td>
-<td style="text-align: right;">3.19</td>
-<td style="text-align: right;">13.10</td>
+<td style="text-align: right;">5.05</td>
+<td style="text-align: right;">32.40</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>There are a total of 27 indicators flagged, which is quite a lot. This deserves a closer look. I’ll plot in groups of eight</p>
+<p>There are a total of 20 indicators flagged, which is quite a lot. This deserves a closer look. I’ll plot in groups of eight</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_dist</span>(MVI, <span class="at">dset =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> df_outliers<span class="sc">$</span>iCode[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -536,35 +502,250 @@ Data sets:
 <div class="cell-output-display">
 <p><img src="indicator_analysis_2_files/figure-html/unnamed-chunk-18-2.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_dist</span>(MVI, <span class="at">dset =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> df_outliers<span class="sc">$</span>iCode[<span class="dv">17</span><span class="sc">:</span><span class="dv">24</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_dist</span>(MVI, <span class="at">dset =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> df_outliers<span class="sc">$</span>iCode[<span class="dv">17</span><span class="sc">:</span><span class="dv">20</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="indicator_analysis_2_files/figure-html/unnamed-chunk-18-3.png" class="img-fluid" width="672"></p>
-</div>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_dist</span>(MVI, <span class="at">dset =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> df_outliers<span class="sc">$</span>iCode[<span class="dv">25</span><span class="sc">:</span><span class="dv">27</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="indicator_analysis_2_files/figure-html/unnamed-chunk-18-4.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>The plots here are all fairly similar and reflect log-normal distributions. We already know that most indicators have a reasonable proportion of unique values, so the high skew/kurtosis values are not caused by duplications. These are typical distributions that are associated with socioeconomic variables such as GDP, wealth, and so on (heavily skewed).</p>
 <p>These indicators are not problematic but may need a data transformation, depending on the objectives of the index (to be discussed). The default here would be to apply a log transformation to each indicator before aggregation, which would make the distributions roughly normal.</p>
+</section>
+<section id="denominators" class="level3">
+<h3 class="anchored" data-anchor-id="denominators">Denominators</h3>
+<p>In this section we can briefly check for any unintended issues regarding denominators. “Denominators” are variables that are used to scale indicators so that municipalities of different sizes can be compared fairly. A typical example is dividing GDP by population to get GDP/capita, which can be used as a meaningful comparison of wealth between countries of different sizes.</p>
+<p>The indicators in the MVI have been denominated earlier in this analysis. Although denomination is a conceptual task, we can also get hints of potential issues via correlations. Specifically, we check for high correlations between indicators and any of the denominators. This will become clear by running the relevant COINr function:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">get_denom_corr</span>(MVI, <span class="at">dset =</span> <span class="st">"Denominated"</span>, <span class="at">cor_thresh =</span> <span class="fl">0.8</span>, <span class="at">cortype =</span> <span class="st">"spearman"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">row.names =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Ind</th>
+<th style="text-align: left;">Denom</th>
+<th style="text-align: right;">Corr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">C.E.10</td>
+<td style="text-align: left;">Pop_Total</td>
+<td style="text-align: right;">-0.97</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C.E.10</td>
+<td style="text-align: left;">Pop_Men</td>
+<td style="text-align: right;">-0.97</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.E.10</td>
+<td style="text-align: left;">Pop_Women</td>
+<td style="text-align: right;">-0.97</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C.E.10</td>
+<td style="text-align: left;">Pop_Adults</td>
+<td style="text-align: right;">-0.97</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.E.10</td>
+<td style="text-align: left;">Pop_NNA</td>
+<td style="text-align: right;">-0.97</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C.E.10</td>
+<td style="text-align: left;">Pop_Discapacity</td>
+<td style="text-align: right;">-0.90</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.E.10</td>
+<td style="text-align: left;">Pop_School</td>
+<td style="text-align: right;">-0.87</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C.E.10</td>
+<td style="text-align: left;">Pop_Working</td>
+<td style="text-align: right;">-0.97</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.E.10</td>
+<td style="text-align: left;">Pop_Elders</td>
+<td style="text-align: right;">-0.94</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C.I.7</td>
+<td style="text-align: left;">Pop_Total</td>
+<td style="text-align: right;">0.92</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.I.7</td>
+<td style="text-align: left;">Pop_Men</td>
+<td style="text-align: right;">0.92</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C.I.7</td>
+<td style="text-align: left;">Pop_Women</td>
+<td style="text-align: right;">0.92</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.I.7</td>
+<td style="text-align: left;">Pop_Adults</td>
+<td style="text-align: right;">0.92</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C.I.7</td>
+<td style="text-align: left;">Pop_NNA</td>
+<td style="text-align: right;">0.90</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.I.7</td>
+<td style="text-align: left;">Pop_Discapacity</td>
+<td style="text-align: right;">0.87</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C.I.7</td>
+<td style="text-align: left;">Pop_Working</td>
+<td style="text-align: right;">0.92</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.I.7</td>
+<td style="text-align: left;">Pop_Elders</td>
+<td style="text-align: right;">0.91</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S.G.1</td>
+<td style="text-align: left;">Pop_Total</td>
+<td style="text-align: right;">0.92</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S.G.1</td>
+<td style="text-align: left;">Pop_Men</td>
+<td style="text-align: right;">0.92</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S.G.1</td>
+<td style="text-align: left;">Pop_Women</td>
+<td style="text-align: right;">0.92</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S.G.1</td>
+<td style="text-align: left;">Pop_Adults</td>
+<td style="text-align: right;">0.94</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S.G.1</td>
+<td style="text-align: left;">Pop_NNA</td>
+<td style="text-align: right;">0.89</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S.G.1</td>
+<td style="text-align: left;">Pop_Discapacity</td>
+<td style="text-align: right;">1.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S.G.1</td>
+<td style="text-align: left;">Pop_Working</td>
+<td style="text-align: right;">0.93</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S.G.1</td>
+<td style="text-align: left;">Pop_Elders</td>
+<td style="text-align: right;">0.93</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S.G.7</td>
+<td style="text-align: left;">Pop_Total</td>
+<td style="text-align: right;">0.84</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S.G.7</td>
+<td style="text-align: left;">Pop_Men</td>
+<td style="text-align: right;">0.84</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S.G.7</td>
+<td style="text-align: left;">Pop_Women</td>
+<td style="text-align: right;">0.84</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S.G.7</td>
+<td style="text-align: left;">Pop_Adults</td>
+<td style="text-align: right;">0.85</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S.G.7</td>
+<td style="text-align: left;">Pop_NNA</td>
+<td style="text-align: right;">0.82</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S.G.7</td>
+<td style="text-align: left;">Pop_Discapacity</td>
+<td style="text-align: right;">0.85</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S.G.7</td>
+<td style="text-align: left;">Pop_Working</td>
+<td style="text-align: right;">0.85</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S.G.7</td>
+<td style="text-align: left;">Pop_Elders</td>
+<td style="text-align: right;">0.84</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The above table shows any high correlations between indicators and denominators (absolute value above 0.8) <em>after</em> the indicators have passed through the denomination stage. Here we can see some things to check.</p>
+<p>The indicator “C.E.10” has very high correlations with population indicators (since all are variations of populations we take this to mean it is correlated with population). This is interesting because it was <em>already</em> divided by “Pop_NNA” - so what does it mean? In this case, it means that perhaps “C.E.10” should not have been divided by population.</p>
+<p>From a statistical point of view, we divide an indicator by a denominator because <em>before</em> denomination it has a strong association with that denominator. By dividing it, we make it (mostly) independent of that denominator, which is in fact the objective (making indicators size-independent, or <em>intensive</em>). Now, if an indicator is <em>not</em> related to an denominator, and we divide by that denominator, what happens? Then it becomes strongly dependent on it! And I think this what has happened here.</p>
+<p>In short, “C.E.10” was not related to population. Since it was divided by population, now it is related (negatively) to population. We can check</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="fu">c</span>(<span class="st">"Raw"</span>, <span class="st">"uMeta"</span>), <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"C.E.10"</span>, <span class="st">"Pop_NNA"</span>))</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="fu">c</span>(<span class="st">"Denominated"</span>, <span class="st">"uMeta"</span>), <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"C.E.10"</span>, <span class="st">"Pop_NNA"</span>), <span class="at">log_scale =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>))</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="indicator_analysis_2_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Also on a conceptual level, the indicator is “# de alumnos por docente en todos los niveles” which should not be related to population since it is a ratio of pupils to teachers.</p>
+<p>Let’s also check the others. First, “C.I.7” which is “% de la población cubierta con servicios de agua y saneamiento” which was <em>not</em> denominated by anything. We can produce before and after plots as before:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="fu">c</span>(<span class="st">"Denominated"</span>, <span class="st">"uMeta"</span>), <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"C.I.7"</span>, <span class="st">"Pop_Total"</span>), <span class="at">log_scale =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="indicator_analysis_2_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>This shows that this indicator has a strong association with total population, and therefore could be considered for denomination. Supposedly, this indicator measures the percentage of population covered by water/sanitation services. But, this is strange because as the figure shows above, its values lie well outside of the expected 0-100 range if it were a percentage! So this needs to be carefully checked.</p>
+<p>This also points to the need to review carefully the meaning of each indicator before proceeding. I also notice that other indicators that are described as percentages have values that are not in a percentage range.</p>
+<p>Another indicator that is in the flagged list above is “S.G.1” and this looks like it may have the same issue. It is described as “% de personas con discapacidad” and has no denominator assigned. Let’s plot it as previously.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="fu">c</span>(<span class="st">"Denominated"</span>, <span class="st">"uMeta"</span>), <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"S.G.1"</span>, <span class="st">"Pop_Total"</span>), <span class="at">log_scale =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="indicator_analysis_2_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>We see a similar pattern: this is strongly related to population, and also its values look like population <em>numbers</em>, not percentages. This is also true for the other indicator flagged, “S.G.7”. In fact, all “S.G.x” indicators look like they should be divided by population.</p>
 </section>
 <section id="correlations" class="level3">
 <h3 class="anchored" data-anchor-id="correlations">Correlations</h3>
 <p>Here we look at the associations between indicators, using correlations. Although correlations are a linear measure of dependence and relationships could be nonlinear, linear dependence still does a good job of flagging strong associations which we can later check more closely if required.</p>
 <p>Let us begin with a general plot of all correlations between indicators to get an idea for the correlation structure. We exclude correlations between indicators that are not in the same dimension, and we draw boxes around each categoria. We also account for the <em>directions</em> of indicators, i.e.&nbsp;indicators with negative directionality have their directions reversed before calculating correlations.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_corr</span>(MVI, <span class="at">dset =</span> <span class="st">"Denominated"</span>, <span class="at">showvals =</span> <span class="cn">FALSE</span>, <span class="at">box_level =</span> <span class="dv">2</span>,</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">grouplev =</span> <span class="dv">3</span>, <span class="at">flagcolours =</span> <span class="cn">TRUE</span>, <span class="at">cortype =</span> <span class="st">"spearman"</span>, <span class="at">pval =</span> <span class="dv">0</span>, <span class="at">use_directions =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_corr</span>(MVI, <span class="at">dset =</span> <span class="st">"Denominated"</span>, <span class="at">showvals =</span> <span class="cn">FALSE</span>, <span class="at">box_level =</span> <span class="dv">2</span>,</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">grouplev =</span> <span class="dv">3</span>, <span class="at">flagcolours =</span> <span class="cn">TRUE</span>, <span class="at">cortype =</span> <span class="st">"spearman"</span>, <span class="at">pval =</span> <span class="dv">0</span>, <span class="at">use_directions =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="indicator_analysis_2_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+<p><img src="indicator_analysis_2_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>This shows that most correlations can be considered “OK” (correlation 0.3-0.9) or “weak” (correlation between -0.4 and 0.3). Obviously these thresholds are rough. In any case the main things to look out for are strongly negative correlations (which almost cancel out in aggregation) or collinearities (which can imply double counting). COINr has a dedicated function for picking these up:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># any correlations above 0.9 within the same categoria</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">get_corr_flags</span>(MVI, <span class="at">dset =</span> <span class="st">"Denominated"</span>, <span class="at">cor_thresh =</span> <span class="fl">0.9</span>, <span class="at">thresh_type =</span> <span class="st">"high"</span>,</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">grouplev =</span> <span class="dv">2</span>, <span class="at">cortype =</span> <span class="st">"spearman"</span>, <span class="at">use_directions =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">row.names =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># any correlations above 0.9 within the same categoria</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">get_corr_flags</span>(MVI, <span class="at">dset =</span> <span class="st">"Denominated"</span>, <span class="at">cor_thresh =</span> <span class="fl">0.9</span>, <span class="at">thresh_type =</span> <span class="st">"high"</span>,</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">grouplev =</span> <span class="dv">2</span>, <span class="at">cortype =</span> <span class="st">"spearman"</span>, <span class="at">use_directions =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">row.names =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="table table-sm table-striped">
 <thead>
@@ -577,46 +758,29 @@ Data sets:
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Serv_Pub</td>
-<td style="text-align: left;">C.I.5</td>
-<td style="text-align: left;">C.I.6</td>
-<td style="text-align: right;">0.956</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Alim_Vivi</td>
-<td style="text-align: left;">S.A.2</td>
-<td style="text-align: left;">S.A.3</td>
-<td style="text-align: right;">0.987</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Trabajo</td>
-<td style="text-align: left;">S.T.1</td>
-<td style="text-align: left;">S.T.4</td>
-<td style="text-align: right;">0.987</td>
+<td style="text-align: left;">Educacion</td>
+<td style="text-align: left;">C.E.7</td>
+<td style="text-align: left;">C.E.8</td>
+<td style="text-align: right;">0.976</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>Here we see that there are three instances of near-collinear relationships between indicators within the same categoria. In this case, these indicators would be flagged, such that they could be considered for removal. It is anyway a good idea to plot these indicators</p>
+<p>Here we see that there is one instance of near-collinear relationships between indicators within the same categoria. In this case, these indicators would be flagged, such that they could be considered for removal. It is anyway a good idea to plot to see what is going on.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"C.I.5"</span>, <span class="st">"C.I.6"</span>), <span class="at">log_scale =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>))</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"S.A.2"</span>, <span class="st">"S.A.3"</span>), <span class="at">log_scale =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>))</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> <span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"S.T.1"</span>, <span class="st">"S.T.4"</span>), <span class="at">log_scale =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>))</span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> p2 <span class="sc">+</span> p3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"C.E.7"</span>, <span class="st">"C.E.8"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="indicator_analysis_2_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+<p><img src="indicator_analysis_2_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>We can see that the relationships are very strongly linear, although there is also a degree of scatter.</p>
+<p>We can see that the relationship here is very strongly linear, although there is also a degree of scatter.</p>
 <p>We can do the same for negative correlations:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># any negative correlations below -0.4 within the same categoria</span></span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">get_corr_flags</span>(MVI, <span class="at">dset =</span> <span class="st">"Denominated"</span>, <span class="at">cor_thresh =</span> <span class="sc">-</span><span class="fl">0.4</span>, <span class="at">thresh_type =</span> <span class="st">"low"</span>,</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">grouplev =</span> <span class="dv">2</span>, <span class="at">cortype =</span> <span class="st">"spearman"</span>, <span class="at">use_directions =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">row.names =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># any negative correlations below -0.4 within the same categoria</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">get_corr_flags</span>(MVI, <span class="at">dset =</span> <span class="st">"Denominated"</span>, <span class="at">cor_thresh =</span> <span class="sc">-</span><span class="fl">0.4</span>, <span class="at">thresh_type =</span> <span class="st">"low"</span>,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">grouplev =</span> <span class="dv">2</span>, <span class="at">cortype =</span> <span class="st">"spearman"</span>, <span class="at">use_directions =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">row.names =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="table table-sm table-striped">
 <thead>
@@ -629,52 +793,16 @@ Data sets:
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Educacion</td>
-<td style="text-align: left;">C.E.10</td>
-<td style="text-align: left;">C.E.11</td>
-<td style="text-align: right;">-0.574</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Educacion</td>
-<td style="text-align: left;">C.E.10</td>
-<td style="text-align: left;">C.E.9</td>
-<td style="text-align: right;">-0.885</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Educacion</td>
-<td style="text-align: left;">C.E.8</td>
-<td style="text-align: left;">C.E.9</td>
-<td style="text-align: right;">-0.738</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Economia</td>
-<td style="text-align: left;">S.E.1</td>
-<td style="text-align: left;">S.E.2</td>
-<td style="text-align: right;">-0.808</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Economia</td>
-<td style="text-align: left;">S.E.2</td>
-<td style="text-align: left;">S.E.3</td>
-<td style="text-align: right;">-0.688</td>
+<td style="text-align: left;">Alim_Vivi</td>
+<td style="text-align: left;">S.A.3</td>
+<td style="text-align: left;">S.A.4</td>
+<td style="text-align: right;">-0.412</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Grup_Vul</td>
-<td style="text-align: left;">S.G.3</td>
+<td style="text-align: left;">S.G.2</td>
 <td style="text-align: left;">S.G.4</td>
-<td style="text-align: right;">-0.550</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Grup_Vul</td>
-<td style="text-align: left;">S.G.3</td>
-<td style="text-align: left;">S.G.6</td>
-<td style="text-align: right;">-0.424</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Grup_Vul</td>
-<td style="text-align: left;">S.G.3</td>
-<td style="text-align: left;">S.G.8</td>
-<td style="text-align: right;">-0.939</td>
+<td style="text-align: right;">-0.407</td>
 </tr>
 </tbody>
 </table>
@@ -682,16 +810,16 @@ Data sets:
 </div>
 <p>Here we see some fairly strong negative correlations. We will visualise some of these:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"C.E.10"</span>, <span class="st">"C.E.9"</span>), <span class="at">log_scale =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>))</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"S.E.1"</span>, <span class="st">"S.E.2"</span>), <span class="at">log_scale =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>))</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> <span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"S.G.3"</span>, <span class="st">"S.G.8"</span>))</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> p2 <span class="sc">+</span> p3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"S.A.3"</span>, <span class="st">"S.A.4"</span>), <span class="at">log_scale =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>))</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="st">"Denominated"</span>, <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"S.G.2"</span>, <span class="st">"S.G.4"</span>), <span class="at">log_scale =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>))</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="indicator_analysis_2_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+<p><img src="indicator_analysis_2_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>Recall that the plots here are of the raw (denominated) indicator data which does not account for the directionality of indicators (unlike the correlation plots): here C.E.9 has negative directionality, as does S.E.2. The plot of S.G.3 against S.G.8 is of particular interest: it seems that where there are a lot of Maya people there are very few ladino/mestizo people. I wonder however if this is an artifact of the way one of these indicators is calculated - perhaps one is calculated based on the other?</p>
+<p>The negative correlations here are only moderate and, although not ideal, this is not a strong case for removing any of these indicators unless there are additional reasons to do so.</p>
 </section>
 </section>
 <section id="conclusions" class="level2">
@@ -734,21 +862,12 @@ Data sets:
 <section id="summary-table" class="level3">
 <h3 class="anchored" data-anchor-id="summary-table">Summary table</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"C:/Users/becke/OneDrive/Work/Guatemala/MVI_Guatemala/R/selection.R"</span>)</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="fu">get_indicator_flags</span>(MVI, <span class="st">"Denominated"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">row.names =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"R/selection.R"</span>)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="fu">get_indicator_flags</span>(MVI, <span class="st">"Denominated"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">row.names =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="table table-sm table-striped">
-<colgroup>
-<col style="width: 10%">
-<col style="width: 14%">
-<col style="width: 12%">
-<col style="width: 10%">
-<col style="width: 10%">
-<col style="width: 14%">
-<col style="width: 28%">
-</colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: left;">iCode</th>
@@ -766,7 +885,7 @@ Data sets:
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">0.75000</td>
 <td style="text-align: right;">5.040</td>
-<td style="text-align: right;">27.90</td>
+<td style="text-align: right;">27.9000</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">NA</td>
 </tr>
@@ -774,8 +893,8 @@ Data sets:
 <td style="text-align: left;">A.M.2</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">3.240</td>
-<td style="text-align: right;">13.20</td>
+<td style="text-align: right;">2.140</td>
+<td style="text-align: right;">5.8200</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">NA</td>
 </tr>
@@ -784,97 +903,79 @@ Data sets:
 <td style="text-align: right;">0.118</td>
 <td style="text-align: right;">0.02500</td>
 <td style="text-align: right;">1.190</td>
-<td style="text-align: right;">2.26</td>
+<td style="text-align: right;">2.2600</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">A.M.4</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">4.100</td>
-<td style="text-align: right;">24.30</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">S.A.2</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">3.320</td>
-<td style="text-align: right;">16.50</td>
-<td style="text-align: left;">S.A.3</td>
 <td style="text-align: left;">NA</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">S.A.3</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">2.670</td>
-<td style="text-align: right;">10.80</td>
-<td style="text-align: left;">S.A.2</td>
+<td style="text-align: right;">0.02650</td>
+<td style="text-align: right;">0.746</td>
+<td style="text-align: right;">0.0591</td>
 <td style="text-align: left;">NA</td>
+<td style="text-align: left;">S.A.4</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">S.A.4</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">0.35000</td>
 <td style="text-align: right;">9.120</td>
-<td style="text-align: right;">101.00</td>
+<td style="text-align: right;">101.0000</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
+<td style="text-align: left;">S.A.3</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">S.E.1</td>
+<td style="text-align: left;">S.E.2</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">2.740</td>
-<td style="text-align: right;">14.70</td>
+<td style="text-align: right;">2.390</td>
+<td style="text-align: right;">8.2800</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: left;">S.E.2</td>
+<td style="text-align: left;">NA</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">S.E.2</td>
+<td style="text-align: left;">S.G.1</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">3.730</td>
-<td style="text-align: right;">20.00</td>
+<td style="text-align: right;">0.00588</td>
+<td style="text-align: right;">11.000</td>
+<td style="text-align: right;">150.0000</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: left;">S.E.1, S.E.3</td>
+<td style="text-align: left;">NA</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">S.E.3</td>
+<td style="text-align: left;">S.G.2</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">3.430</td>
-<td style="text-align: right;">17.90</td>
+<td style="text-align: right;">0.07650</td>
+<td style="text-align: right;">-0.625</td>
+<td style="text-align: right;">-0.8240</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: left;">S.E.2</td>
+<td style="text-align: left;">S.G.4</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">S.G.3</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">0.206</td>
-<td style="text-align: right;">-1.76</td>
+<td style="text-align: right;">0.00588</td>
+<td style="text-align: right;">3.110</td>
+<td style="text-align: right;">14.8000</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: left;">S.G.4, S.G.6, S.G.8</td>
+<td style="text-align: left;">NA</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">S.G.4</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">0.03530</td>
-<td style="text-align: right;">3.710</td>
-<td style="text-align: right;">18.00</td>
+<td style="text-align: right;">14.300</td>
+<td style="text-align: right;">227.0000</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: left;">S.G.3</td>
+<td style="text-align: left;">S.G.2</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">S.G.5</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.03820</td>
-<td style="text-align: right;">8.700</td>
-<td style="text-align: right;">108.00</td>
+<td style="text-align: right;">0.05000</td>
+<td style="text-align: right;">6.350</td>
+<td style="text-align: right;">60.0000</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">NA</td>
 </tr>
@@ -882,152 +983,125 @@ Data sets:
 <td style="text-align: left;">S.G.6</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">0.21800</td>
-<td style="text-align: right;">6.250</td>
-<td style="text-align: right;">46.50</td>
+<td style="text-align: right;">11.500</td>
+<td style="text-align: right;">149.0000</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: left;">S.G.3</td>
+<td style="text-align: left;">NA</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">S.G.7</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00588</td>
-<td style="text-align: right;">10.500</td>
-<td style="text-align: right;">142.00</td>
+<td style="text-align: right;">0.04410</td>
+<td style="text-align: right;">8.120</td>
+<td style="text-align: right;">75.2000</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">NA</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">S.G.8</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">-0.153</td>
-<td style="text-align: right;">-1.74</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">S.G.3</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">S.T.1</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">2.700</td>
-<td style="text-align: right;">11.90</td>
-<td style="text-align: left;">S.T.4</td>
-<td style="text-align: left;">NA</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">S.T.2</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">4.060</td>
-<td style="text-align: right;">23.30</td>
+<td style="text-align: right;">0.00588</td>
+<td style="text-align: right;">9.460</td>
+<td style="text-align: right;">115.0000</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">NA</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">S.T.4</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">2.420</td>
-<td style="text-align: right;">8.25</td>
-<td style="text-align: left;">S.T.1</td>
-<td style="text-align: left;">NA</td>
-</tr>
-<tr class="even">
 <td style="text-align: left;">C.E.4</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">0.00294</td>
 <td style="text-align: right;">9.100</td>
-<td style="text-align: right;">95.10</td>
+<td style="text-align: right;">95.1000</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">NA</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">C.E.6</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">0.00294</td>
 <td style="text-align: right;">2.620</td>
-<td style="text-align: right;">8.09</td>
+<td style="text-align: right;">8.0900</td>
 <td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.E.7</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.00294</td>
+<td style="text-align: right;">0.484</td>
+<td style="text-align: right;">-0.0385</td>
+<td style="text-align: left;">C.E.8</td>
 <td style="text-align: left;">NA</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">C.E.8</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">3.140</td>
-<td style="text-align: right;">14.30</td>
+<td style="text-align: right;">0.00588</td>
+<td style="text-align: right;">0.636</td>
+<td style="text-align: right;">-0.0845</td>
+<td style="text-align: left;">C.E.7</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: left;">C.E.9</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">C.E.9</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">5.750</td>
-<td style="text-align: right;">55.70</td>
+<td style="text-align: right;">0.00588</td>
+<td style="text-align: right;">4.820</td>
+<td style="text-align: right;">39.8000</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: left;">C.E.10, C.E.8</td>
+<td style="text-align: left;">NA</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">C.E.10</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">0.00294</td>
 <td style="text-align: right;">2.990</td>
-<td style="text-align: right;">14.20</td>
+<td style="text-align: right;">14.2000</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: left;">C.E.11, C.E.9</td>
+<td style="text-align: left;">NA</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">C.E.11</td>
 <td style="text-align: right;">0.771</td>
-<td style="text-align: right;">0.00382</td>
-<td style="text-align: right;">4.170</td>
-<td style="text-align: right;">22.40</td>
+<td style="text-align: right;">0.01910</td>
+<td style="text-align: right;">2.450</td>
+<td style="text-align: right;">8.2600</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: left;">C.E.10</td>
+<td style="text-align: left;">NA</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">C.I.5</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">3.470</td>
-<td style="text-align: right;">19.20</td>
-<td style="text-align: left;">C.I.6</td>
+<td style="text-align: right;">0.02650</td>
+<td style="text-align: right;">-2.200</td>
+<td style="text-align: right;">5.1700</td>
+<td style="text-align: left;">NA</td>
 <td style="text-align: left;">NA</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">C.I.6</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">4.300</td>
-<td style="text-align: right;">29.00</td>
-<td style="text-align: left;">C.I.5</td>
-<td style="text-align: left;">NA</td>
-</tr>
-<tr class="even">
 <td style="text-align: left;">C.I.7</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">5.230</td>
-<td style="text-align: right;">44.50</td>
+<td style="text-align: right;">18.100</td>
+<td style="text-align: right;">333.0000</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">NA</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">C.J.2</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">0.00294</td>
 <td style="text-align: right;">10.900</td>
-<td style="text-align: right;">157.00</td>
+<td style="text-align: right;">157.0000</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">NA</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">C.S.4</td>
 <td style="text-align: right;">1.000</td>
 <td style="text-align: right;">0.00294</td>
-<td style="text-align: right;">3.190</td>
-<td style="text-align: right;">13.10</td>
+<td style="text-align: right;">5.050</td>
+<td style="text-align: right;">32.4000</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">NA</td>
 </tr>

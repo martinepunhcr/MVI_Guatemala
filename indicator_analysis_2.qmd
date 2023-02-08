@@ -1,7 +1,7 @@
 ---
 title: "Initial Indicator Analysis"
 author: "William Becker"
-format: pdf
+format: html
 toc: true
 ---
 
@@ -111,10 +111,10 @@ icodes_idata <- names(idata)[!(names(idata) %in% c("uCode", "uName"))]
 icodes_idata[!(icodes_idata %in% imeta$iCode)]
 ```
 
-OK so everything looks consistent. There is one last thing I found which causes a problem. One of the categories "Desplazamento" doesn't have any indicators underneath it so we need to remove it.
+OK so everything looks consistent. There is one last thing I found which causes a problem. One of the categories "Desplazamento" doesn't have any indicators underneath it so we need to remove it. And, since this is the only categoria in the "Mov_Hum" dimension, that dimension also has to be removed.
 
 ```{r}
-imeta <- imeta[imeta$iCode != "Desplaz", ]
+imeta <- imeta[!(imeta$iCode %in% c("Desplaz", "Mov_Hum")), ]
 ```
 
 
@@ -204,18 +204,64 @@ df_outliers <- df_stats[df_stats$Flag.SkewKurt == "OUT", c("iCode", "Skew", "Kur
 knitr::kable(df_outliers, row.names = F)
 ```
 
-There are a total of 27 indicators flagged, which is quite a lot. This deserves a closer look. I'll plot in groups of eight
+There are a total of 20 indicators flagged, which is quite a lot. This deserves a closer look. I'll plot in groups of eight
 
 ```{r}
 plot_dist(MVI, dset = "Denominated", iCodes = df_outliers$iCode[1:8])
 plot_dist(MVI, dset = "Denominated", iCodes = df_outliers$iCode[9:16])
-plot_dist(MVI, dset = "Denominated", iCodes = df_outliers$iCode[17:24])
-plot_dist(MVI, dset = "Denominated", iCodes = df_outliers$iCode[25:27])
+plot_dist(MVI, dset = "Denominated", iCodes = df_outliers$iCode[17:20])
 ```
 
 The plots here are all fairly similar and reflect log-normal distributions. We already know that most indicators have a reasonable proportion of unique values, so the high skew/kurtosis values are not caused by duplications. These are typical distributions that are associated with socioeconomic variables such as GDP, wealth, and so on (heavily skewed).
 
 These indicators are not problematic but may need a data transformation, depending on the objectives of the index (to be discussed). The default here would be to apply a log transformation to each indicator before aggregation, which would make the distributions roughly normal.
+
+### Denominators
+
+In this section we can briefly check for any unintended issues regarding denominators. "Denominators" are variables that are used to scale indicators so that municipalities of different sizes can be compared fairly. A typical example is dividing GDP by population to get GDP/capita, which can be used as a meaningful comparison of wealth between countries of different sizes.
+
+The indicators in the MVI have been denominated earlier in this analysis. Although denomination is a conceptual task, we can also get hints of potential issues via correlations. Specifically, we check for high correlations between indicators and any of the denominators. This will become clear by running the relevant COINr function:
+
+```{r}
+get_denom_corr(MVI, dset = "Denominated", cor_thresh = 0.8, cortype = "spearman") |>
+  knitr::kable(row.names = F)
+```
+
+The above table shows any high correlations between indicators and denominators (absolute value above 0.8) *after* the indicators have passed through the denomination stage. Here we can see some things to check.
+
+The indicator "C.E.10" has very high correlations with population indicators (since all are variations of populations we take this to mean it is correlated with population). This is interesting because it was *already* divided by "Pop_NNA" - so what does it mean? In this case, it means that perhaps "C.E.10" should not have been divided by population.
+
+From a statistical point of view, we divide an indicator by a denominator because *before* denomination it has a strong association with that denominator. By dividing it, we make it (mostly) independent of that denominator, which is in fact the objective (making indicators size-independent, or *intensive*). Now, if an indicator is *not* related to an denominator, and we divide by that denominator, what happens? Then it becomes strongly dependent on it! And I think this what has happened here.
+
+In short, "C.E.10" was not related to population. Since it was divided by population, now it is related (negatively) to population. We can check
+
+```{r}
+p1 <- plot_scatter(MVI, dsets = c("Raw", "uMeta"), iCodes = c("C.E.10", "Pop_NNA"))
+p2 <- plot_scatter(MVI, dsets = c("Denominated", "uMeta"), iCodes = c("C.E.10", "Pop_NNA"), log_scale = c(TRUE, TRUE))
+
+library(patchwork)
+p1 + p2
+```
+
+Also on a conceptual level, the indicator is "# de alumnos por docente en todos los niveles" which should not be related to population since it is a ratio of pupils to teachers.
+
+Let's also check the others. First, "C.I.7" which is "% de la población cubierta con servicios de agua y saneamiento" which was *not* denominated by anything. We can produce before and after plots as before:
+
+```{r}
+plot_scatter(MVI, dsets = c("Denominated", "uMeta"), iCodes = c("C.I.7", "Pop_Total"), log_scale = c(TRUE, TRUE))
+```
+
+This shows that this indicator has a strong association with total population, and therefore could be considered for denomination. Supposedly, this indicator measures the percentage of population covered by water/sanitation services. But, this is strange because as the figure shows above, its values lie well outside of the expected 0-100 range if it were a percentage! So this needs to be carefully checked.
+
+This also points to the need to review carefully the meaning of each indicator before proceeding. I also notice that other indicators that are described as percentages have values that are not in a percentage range.
+
+Another indicator that is in the flagged list above is "S.G.1" and this looks like it may have the same issue. It is described as "% de personas con discapacidad" and has no denominator assigned. Let's plot it as previously.
+
+```{r}
+plot_scatter(MVI, dsets = c("Denominated", "uMeta"), iCodes = c("S.G.1", "Pop_Total"), log_scale = c(TRUE, TRUE))
+```
+
+We see a similar pattern: this is strongly related to population, and also its values look like population *numbers*, not percentages. This is also true for the other indicator flagged, "S.G.7". In fact, all "S.G.x" indicators look like they should be divided by population.
 
 ### Correlations
 
@@ -237,19 +283,14 @@ get_corr_flags(MVI, dset = "Denominated", cor_thresh = 0.9, thresh_type = "high"
   knitr::kable(row.names = F)
 ```
 
-Here we see that there are three instances of near-collinear relationships between indicators within the same categoria. In this case, these indicators would be flagged, such that they could be considered for removal. It is anyway a good idea to plot these indicators
+Here we see that there is one instance of near-collinear relationships between indicators within the same categoria. In this case, these indicators would be flagged, such that they could be considered for removal. It is anyway a good idea to plot to see what is going on.
 
 ```{r}
 #| warning: false
-p1 <- plot_scatter(MVI, dsets = "Denominated", iCodes = c("C.I.5", "C.I.6"), log_scale = c(TRUE, TRUE))
-p2 <- plot_scatter(MVI, dsets = "Denominated", iCodes = c("S.A.2", "S.A.3"), log_scale = c(TRUE, TRUE))
-p3 <- plot_scatter(MVI, dsets = "Denominated", iCodes = c("S.T.1", "S.T.4"), log_scale = c(TRUE, TRUE))
-
-library(patchwork)
-p1 + p2 + p3
+plot_scatter(MVI, dsets = "Denominated", iCodes = c("C.E.7", "C.E.8"))
 ```
 
-We can see that the relationships are very strongly linear, although there is also a degree of scatter.
+We can see that the relationship here is very strongly linear, although there is also a degree of scatter.
 
 We can do the same for negative correlations:
 
@@ -264,14 +305,14 @@ Here we see some fairly strong negative correlations. We will visualise some of 
 
 ```{r}
 #| warning: false
-p1 <- plot_scatter(MVI, dsets = "Denominated", iCodes = c("C.E.10", "C.E.9"), log_scale = c(TRUE, TRUE))
-p2 <- plot_scatter(MVI, dsets = "Denominated", iCodes = c("S.E.1", "S.E.2"), log_scale = c(TRUE, TRUE))
-p3 <- plot_scatter(MVI, dsets = "Denominated", iCodes = c("S.G.3", "S.G.8"))
+p1 <- plot_scatter(MVI, dsets = "Denominated", iCodes = c("S.A.3", "S.A.4"), log_scale = c(TRUE, TRUE))
+p2 <- plot_scatter(MVI, dsets = "Denominated", iCodes = c("S.G.2", "S.G.4"), log_scale = c(TRUE, TRUE))
 
-p1 + p2 + p3
+library(patchwork)
+p1 + p2
 ```
 
-Recall that the plots here are of the raw (denominated) indicator data which does not account for the directionality of indicators (unlike the correlation plots): here C.E.9 has negative directionality, as does S.E.2. The plot of S.G.3 against S.G.8 is of particular interest: it seems that where there are a lot of Maya people there are very few ladino/mestizo people. I wonder however if this is an artifact of the way one of these indicators is calculated - perhaps one is calculated based on the other?
+The negative correlations here are only moderate and, although not ideal, this is not a strong case for removing any of these indicators unless there are additional reasons to do so.
 
 ## Conclusions
 
