@@ -236,7 +236,7 @@ From a statistical point of view, we divide an indicator by a denominator becaus
 In short, "C.E.10" was not related to population. Since it was divided by population, now it is related (negatively) to population. We can check
 
 ```{r}
-p1 <- plot_scatter(MVI, dsets = c("Raw", "uMeta"), iCodes = c("C.E.10", "Pop_NNA"))
+p1 <- plot_scatter(MVI, dsets = c("Raw", "uMeta"), iCodes = c("C.E.10", "Pop_NNA"), log_scale = c(FALSE, TRUE))
 p2 <- plot_scatter(MVI, dsets = c("Denominated", "uMeta"), iCodes = c("C.E.10", "Pop_NNA"), log_scale = c(TRUE, TRUE))
 
 library(patchwork)
