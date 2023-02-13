@@ -12,7 +12,9 @@ get_indicator_flags <- function(coin, dset){
                         t_unq = 0.5,
                         out2 = "df")
 
-  df_disp <- df_stats[c("iCode", "Frc.Avail", "Frc.Same", "Skew", "Kurt")]
+  df_disp <- df_stats[c("iCode", "Frc.Avail", "Frc.Same")]
+
+  df_disp$SkewKurt <- paste0(signif(df_stats$Skew, 3)," / ", signif(df_stats$Kurt, 3))
 
   # we find which iCodes are flagged for which things
   # prep a df
@@ -31,20 +33,22 @@ get_indicator_flags <- function(coin, dset){
                                grouplev = 2, cortype = "spearman", use_directions = TRUE)
   df_flag$NegCorr <- df_flag$iCode %in% c(df_negcorr$Ind1, df_negcorr$Ind2)
 
-  # Total number of flags
-  df_flag$FlagCount <- rowSums(df_flag[-1])
+  # # Total number of flags
+  # df_flag$FlagCount <- rowSums(df_flag[-1])
   # filter
-  df_flag <- df_flag[df_flag$FlagCount > 0 ,]
+  df_flag <- df_flag[rowSums(df_flag[-1]) > 0 ,]
 
   # assemble a big table for viewing (to probably adjust yet)
   df_disp <- df_disp[match(df_flag$iCode, df_disp$iCode), ]
+
   # add correlation entries
   pairs_colin <- gather_correlations(df_collinear)
   df_disp$Collinear <- pairs_colin[match(df_disp$iCode, names(pairs_colin))]
   pairs_neg <- gather_correlations(df_negcorr)
   df_disp$NegCorr <- pairs_neg[match(df_disp$iCode, names(pairs_neg))]
 
-  df_disp
+  list(df_disp = df_disp,
+       df_flag = df_flag)
 }
 
 gather_correlations <- function(X){
