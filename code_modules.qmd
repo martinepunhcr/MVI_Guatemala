@@ -1,0 +1,104 @@
+---
+title: "Code Modules"
+author: "William Becker"
+format: html
+---
+
+This document gives some notes on the development of the "code modules" for the MVI. These code modules are envisaged to be chunks of code (probably functions or sets of functions) which deal with particular tasks in the construction of the MVI. The modules are intended to comprise (most of) the back end code of an eventual user application which can be used to construct similar indices to the MVI for other countries. This means that the modules have to be focused, and robust.
+
+There are 5 modules.
+
+- Data input
+- Indicator analysis and selection
+- Index construction and visualisation
+- Reweighting
+- Export
+
+Here I give a brief description of each module which is used mainly for the planning of these modules prior to construction.
+
+Note that for the present contract the modules will be functions which will need to be sourced by the `source()` command. In the app phase I would however propose to put these into an R package environment in a separate code repo.
+
+## Data input
+
+**Objective**: To allow the user to input their data, which can then be used for the rest of the analysis.
+
+**Input(s)**: The only input here will be the input file. I think and Excel spreadsheet should be sufficient.
+
+**Output(s)**
+
+- Front end: confirmation of successful data entry, or else helpful error messages. Summary of what was input, e.g. number of indicators, number of units. Possibly a framework plot and/or a table of data.
+- Back end: An assembled coin.
+
+**Notes**
+
+- The input will have to be carefully constrained by using e.g. an Excel spreadsheet with a template that is quite restrictive of how users enter their data. I can also put some checks in Excel, e.g. to ensure numerical columns, etc. This template I think can be properly developed in the next contract/phase.
+- When data is uploaded into R, I will have to construct the iMeta and iData inputs, using a saved iMeta which defines the index structure
+- Will have to deal with any categories/dimensions that have no indicators in prior to assembling coin
+- We will need strict checks on unit codes if we want to use maps. E.g. unit codes are *required* to be those used as second level administrative divisions (admin2).
+- Do we need a units column?
+
+
+## Indicator analysis and selection
+
+**Objective**: To flag any statistical issues with indicators and allow the user to remove indicators if they want to (without having to edit their input file).
+
+**Input(s)**: This will be a two-stage process: the analysis and the indicator selection. For the former there is no input. For the latter the input will be any indicators to remove. In the code this will be a vector of indicator codes, but in app it will be selected interactively.
+
+**Output(s)**
+
+- Front: Analysis table at first step (as DT), probably a framework plot for the second. Details of indicators removed. We may also need e.g. box plot and/or scatter plot to help users visualise (tbd).
+- Back: Analysis table as data frame, then modified coin after removal of indicators, if any. Modified coin.
+
+**Notes**
+
+- Thinking ahead, we'll have to figure out what the best way to inform the user is when removing indicators. I would say maybe the framework plot here and maybe some before/after stats.
+- We will need to keep a record of which indicators were removed. In the app, we will need to save the indicator flags table somewhere so that it is also exported when everything else is.
+
+
+## Index construction and visualisation
+
+**Objective**: To build the index from the indicators selected in the previous step and show the results as table/map/bar chart.
+
+**Input(s)**: Possibly none from the user. If the methodology is fixed, there is no need for any input except perhaps which visualisation to use.
+
+**Output(s)**
+
+- Front: Results table, bar chart, map
+- Back: Modified coin.
+
+**Notes**
+
+The only thing to decide here is whether to give the user any control over the methodology. Essentially we *could* offer control at the treatment, normalisation or aggregation stages. However this would make things more confusing and also mean departing from a standardised methodology. The only case possibly worth considering is the outlier treatment for fringe cases which could cause an error. Another possibility is that we automate the data treatment so in case there is an error, that indicator is reverted back to it's original state.
+
+
+## Reweighting
+
+**Objective**: To allow users to adjust weights manually to their preferences, and see the results interactively change.
+
+**Input(s)**: Weights - which can be just at dimension level, or at dimension and category level. Would not recommend allowing indicator-level adjustment because it would result in a messy UI and probably confusion for the user.
+
+**Output(s)**
+
+- Front: Table of results. Possibly compared side by side with the un-altered results.
+- Back: Modified coin plus data frame output of results.
+
+**Notes**
+
+- The question is: when a user adjusts weights do we retain a parallel copy of the index with the original weights which can be used for comparison? Or should everything update? I think possibly the latter if we want to keep the weight adjustment on the same tab as the results visualisations.
+- We will anyway need a reset button to reset to original weights.
+
+
+## Export
+
+**Objective**: To export all results to Excel.
+
+**Input(s)**: Just the command to export.
+
+**Output(s)**
+
+- Front: An Excel spreadsheet with results.
+- Back: None
+
+**Notes**
+
+COINr has a function to export to Excel. However we will need to adjust this because it currently outputs everything in the coin. Instead we want a simplified output which has the main results, a record of which indicators were selected, weights used, and probably the data sets generated at each construction stage for the record.
