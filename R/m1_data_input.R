@@ -3,9 +3,11 @@
 
 # Required packages -------------------------------------------------------
 
-library(readxl)
-library(COINr)
-library(plotly, quietly = TRUE)
+suppressMessages({
+  library(readxl)
+  library(COINr)
+  library(plotly)
+})
 
 
 # Functions ---------------------------------------------------------------
@@ -14,6 +16,8 @@ library(plotly, quietly = TRUE)
 # Reads an Excel file found at `file_path` which is expected to be in a specific
 # format. See "./data_input/data_module-input.xlsx" for example.
 # Outputs a constructed coin.
+#
+# Example: MVI <- f_data_input("./data_input/data_module-input.xlsx")
 #
 f_data_input <- function(file_path){
 
@@ -213,8 +217,6 @@ f_plot_framework <- function(coin, seg_cols = NULL){
       marker = list(colors = seg_cols)
     )
   }
-
-
 
   fig
 
