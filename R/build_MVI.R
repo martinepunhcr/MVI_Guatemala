@@ -16,7 +16,7 @@ build_MVI_coin <- function(){
   l <- tidy_inputs(idata, imeta)
 
   # build coin
-  new_coin(iData = l$idata, iMeta = l$imeta,
+  MVI <-new_coin(iData = l$idata, iMeta = l$imeta,
            level_names = c("Indicator", "Category", "Dimension", "Index"))
 
   # treat outliers
