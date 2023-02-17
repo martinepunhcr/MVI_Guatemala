@@ -70,7 +70,7 @@ All function names in the code modules are prefaced with `f_`. This is to mark t
 
 **Notes**
 
-The only thing to decide here is whether to give the user any control over the methodology. Essentially we *could* offer control at the treatment, normalisation or aggregation stages. However this would make things more confusing and also mean departing from a standardised methodology. The only case possibly worth considering is the outlier treatment for fringe cases which could cause an error. Another possibility is that we automate the data treatment so in case there is an error, that indicator is reverted back to it's original state.
+The only thing to decide here is whether to give the user any control over the methodology. Essentially we *could* offer control at the treatment, normalisation or aggregation stages. However this would make things more confusing and also mean departing from a standardised methodology. The only case possibly worth considering is the outlier treatment for fringe cases which could cause an error. Another possibility is that we automate the data treatment so in case there is an error, that indicator is reverted back to its original state.
 
 
 ## Reweighting
