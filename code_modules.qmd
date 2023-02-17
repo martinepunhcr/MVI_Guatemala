@@ -18,6 +18,8 @@ Here I give a brief description of each module which is used mainly for the plan
 
 Note that for the present contract the modules will be functions which will need to be sourced by the `source()` command. In the app phase I would however propose to put these into an R package environment in a separate code repo.
 
+All function names in the code modules are prefaced with `f_`. This is to mark them as back-end functions and this distinction will be helpful in GIU development.
+
 ## Data input
 
 **Objective**: To allow the user to input their data, which can then be used for the rest of the analysis.
