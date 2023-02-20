@@ -25,6 +25,10 @@ f_change_weights <- function(coin, w){
 
   stopifnot(is.coin(coin))
 
+  if(is.null(coin$Data$Aggregated)){
+    abort("Can't find results in the coin. Did you forget to build the index first?")
+  }
+
   # Get weights that were last used to aggregate ----
 
   # special case: reset or make equal
@@ -70,8 +74,20 @@ f_change_weights <- function(coin, w){
 
   coin$Log$Aggregate$w <- w_new
 
-  Regen(coin, from = "Aggregate")
+  # extract analysis
+  ind_analysis <- coin$Analysis$Raw
+  analysis_exists <- !is.null(ind_analysis)
 
+  coin <- Regen(coin, from = "Aggregate")
+
+  if(analysis_exists){
+    coin$Analysis$Raw <- ind_analysis
+  }
+
+  # generate results tables again
+  coin <- f_generate_results(coin)
+
+  coin
 
 }
 
@@ -89,6 +105,10 @@ f_get_equal_weights <- function(coin){
 
 # Returns the last set of weights used when aggregating the index.
 f_get_last_weights <- function(coin){
+
+  if(is.null(coin$Log$Aggregate)){
+    return(NULL)
+  }
 
   w_log <- coin$Log$Aggregate$w
 
