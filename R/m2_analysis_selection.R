@@ -82,9 +82,6 @@ f_analyse_indicators <- function(coin){
 
   # Tidy and output ----
 
-  # only include rows with at least one flag
-  df_flag <- df_flag[rowSums(df_flag[-1]) > 0 ,]
-
   # assemble a big table for viewing (to probably adjust yet)
   df_disp <- df_disp[match(df_flag$iCode, df_disp$iCode), ]
 
@@ -95,6 +92,10 @@ f_analyse_indicators <- function(coin){
 
   pairs_neg <- f_gather_correlations(df_negcorr)
   df_disp$NegCorr <- pairs_neg[match(df_disp$iCode, names(pairs_neg))]
+
+  # status column (will be changed if indicators are added/removed)
+  df_disp$Status <- "In"
+  df_flag$Status <- FALSE
 
   # add outputs to coin
   coin$Analysis$Raw <- list(
@@ -118,7 +119,7 @@ f_gather_correlations <- function(X){
 
 }
 
-f_display_indicator_analysis <- function(coin){
+f_display_indicator_analysis <- function(coin, filter_to_flagged = TRUE){
 
   stopifnot(is.coin(coin))
 
@@ -127,6 +128,16 @@ f_display_indicator_analysis <- function(coin){
 
   if(is.null(Xd) || is.null(Xh)){
     abort("Indicator analysis not found in coin. Run f_analyse_indicators() first.")
+  }
+
+  if(filter_to_flagged){
+
+    # only include rows with at least one flag
+    include_rows <- rowSums( Xh[!(names(Xh) %in% c("iCode", "Status"))] ) > 0
+
+    Xd <- Xd[include_rows, ]
+    Xh <- Xh[include_rows, ]
+
   }
 
   f_highlight_DT(Xd, Xh)
@@ -185,7 +196,27 @@ f_highlight_DT <- function(Xd, Xh, table_caption = NULL, highlight_colour = "#ff
 #
 f_remove_indicators <- function(coin, remove_indicators = NULL){
 
-  change_ind(coin, drop = remove_indicators, regen = TRUE)
+  # extract analysis
+  ind_analysis <- coin$Analysis$Raw
+  analysis_exists <- !is.null(ind_analysis)
+
+  coin <- change_ind(coin, drop = remove_indicators, regen = TRUE)
+
+  if(analysis_exists){
+    # edit and replace analysis
+    ind_analysis$FlaggedStats$Status[
+      ind_analysis$FlaggedStats$iCode %in% remove_indicators] <- "OUT"
+    ind_analysis$Flags$Status[
+      ind_analysis$Flags$iCode %in% remove_indicators] <- TRUE
+
+    coin$Analysis$Raw <- ind_analysis
+  }
+
+  if(!is.null(coin$Data$Aggregated)){
+    coin <- f_generate_results(coin)
+  }
+
+  coin
 
 }
 
@@ -194,17 +225,51 @@ f_remove_indicators <- function(coin, remove_indicators = NULL){
 #
 f_add_indicators <- function(coin, add_indicators = NULL){
 
-  change_ind(coin, add = add_indicators, regen = TRUE)
+  # extract analysis
+  ind_analysis <- coin$Analysis$Raw
+  analysis_exists <- !is.null(ind_analysis)
+
+  coin <- change_ind(coin, add = add_indicators, regen = TRUE)
+
+  if(analysis_exists){
+    # edit and replace analysis
+    ind_analysis$FlaggedStats$Status[
+      ind_analysis$FlaggedStats$iCode %in% add_indicators] <- "In"
+    ind_analysis$Flags$Status[
+      ind_analysis$Flags$iCode %in% add_indicators] <- FALSE
+
+    coin$Analysis$Raw <- ind_analysis
+  }
+
+  if(!is.null(coin$Data$Aggregated)){
+    coin <- f_generate_results(coin)
+  }
+
+  coin
 
 }
 
-# Resets adding/removal of indicators so that ALL indicators that were input
-# with input data are included.
+# # Resets adding/removal of indicators so that ALL indicators that were input
+# # with input data are included.
+# #
+# f_reset_indicators <- function(coin){
 #
-f_reset_indicators <- function(coin){
-
-  coin$Log$new_coin$exclude <- NULL
-
-  Regen(MVI)
-
-}
+#   # extract analysis
+#   ind_analysis <- coin$Analysis$Raw
+#   analysis_exists <- !is.null(ind_analysis)
+#
+#   coin$Log$new_coin$exclude <- NULL
+#
+#   coin <- Regen(coin)
+#
+#   if(analysis_exists){
+#     # edit and replace analysis
+#     ind_analysis$FlaggedStats$Status <- "In"
+#     ind_analysis$Flags$Status <- FALSE
+#
+#     coin$Analysis$Raw <- ind_analysis
+#   }
+#
+#   coin
+#
+# }
