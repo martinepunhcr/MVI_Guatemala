@@ -190,7 +190,7 @@ f_plot_framework <- function(coin, seg_cols = NULL){
     iMeta <- coin$Meta$Ind[!is.na(coin$Meta$Ind$Parent), ]
   }
 
-  iMeta$EffWeight <- round(iMeta$EffWeight, 2)
+  #iMeta$EffWeight <- round(iMeta$EffWeight, 2)
 
   if(is.null(seg_cols)){
     fig <- plotly::plot_ly(
