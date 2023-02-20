@@ -37,11 +37,8 @@ f_build_index <- function(coin){
   # aggregate using weighted arithmetic mean
   coin <- Aggregate(coin, dset = "Normalised")
 
-  # generate results tables (attached to coin, so will appear when exported to Excel)
-  coin <- get_results(coin, dset = "Aggregated", tab_type = "Full",
-                     also_get = "uName", nround = 1, out2 = "coin")
-  coin <- get_results(coin, dset = "Aggregated", tab_type = "Full", use = "ranks",
-                     also_get = "uName", nround = 1, out2 = "coin")
+  # generate results tables
+  coin <- f_generate_results(coin)
 
   coin
 }
@@ -49,7 +46,7 @@ f_build_index <- function(coin){
 # Outputs an interactive results table suitable for HTML documents and the app.
 # set type = "scores" or "ranks".
 #
-f_results_table <- function(coin, type = "scores"){
+f_display_results_table <- function(coin, type = "scores"){
 
   if(type == "scores"){
     df_results <- coin$Results$FullScore
@@ -125,5 +122,21 @@ f_plot_map <- function(coin, dset = "Aggregated", iCode = "MVI", shp_path){
               position = "bottomright")
 
   mp
+
+}
+
+# generates sorted results tables and attaches back to the coin
+f_generate_results <- function(coin){
+
+  stopifnot(is.coin(coin),
+            !is.null(coin$Data$Aggregated))
+
+  # generate results tables (attached to coin, so will appear when exported to Excel)
+  coin <- get_results(coin, dset = "Aggregated", tab_type = "Full",
+                      also_get = "uName", nround = 1, out2 = "coin")
+  coin <- get_results(coin, dset = "Aggregated", tab_type = "Full", use = "ranks",
+                      also_get = "uName", nround = 1, out2 = "coin")
+
+  coin
 
 }
