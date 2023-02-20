@@ -104,3 +104,12 @@ The only thing to decide here is whether to give the user any control over the m
 **Notes**
 
 COINr has a function to export to Excel. However we will need to adjust this because it currently outputs everything in the coin. Instead we want a simplified output which has the main results, a record of which indicators were selected, weights used, and probably the data sets generated at each construction stage for the record.
+
+In more detail let's say we probably want the following:
+
+- Results table (scores)
+- Results table (ranks)
+- Analysis table
+- Indicators included: possibly the lineage table
+- Weights used
+- Data sets at each stage
