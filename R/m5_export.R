@@ -66,28 +66,28 @@ f_export_to_excel <- function(coin, fname = "index_export.xlsx"){
         # cols = c(5, 16)
         conditionalFormatting(
           wb, s, cols = 5, rows = r_format,
-          style = brewer.pal(n = 3, name = "YlOrRd"),
+          style = RColorBrewer::brewer.pal(n = 3, name = "YlOrRd"),
           type = "colourScale")
 
         # Amenazas
         # c(6, 9, 10)
         conditionalFormatting(
           wb, s, cols = 6, rows = r_format,
-          style = brewer.pal(n = 3, name = "RdPu"),
+          style = RColorBrewer::brewer.pal(n = 3, name = "RdPu"),
           type = "colourScale")
 
         # Sit_SocEc
         # c(7, 17:20)
         conditionalFormatting(
           wb, s, cols = 7, rows = r_format,
-          style = brewer.pal(n = 3, name = "PuBuGn"),
+          style = RColorBrewer::brewer.pal(n = 3, name = "PuBuGn"),
           type = "colourScale")
 
         # Sit_SocEc
         # cols = c(8, 11:15)
         conditionalFormatting(
           wb, s, cols = 8, rows = r_format,
-          style = brewer.pal(n = 3, name = "YlGnBu"),
+          style = RColorBrewer::brewer.pal(n = 3, name = "YlGnBu"),
           type = "colourScale")
 
       }
