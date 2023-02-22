@@ -1,0 +1,1566 @@
+---
+title: "Severity Index"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+
+
+suppressMessages({
+  library(readxl)
+  library(COINr)
+  library(plotly)
+})
+
+```
+
+```{r development-load}
+# Load already included functions if relevant
+pkgload::load_all(export_all = FALSE)
+```
+
+
+
+This document gives some notes on the development of the "code modules" for Index Development. 
+
+These code modules are envisaged to be chunks of code which deal with particular tasks in the construction of the index. 
+
+The modules are intended to comprise (most of) the back end code of an eventual user application which can be used to construct similar indices to the index for other countries. 
+
+This means that the modules have to be focused, and robust.
+
+There are 5 modules.
+
+- Data input
+- Indicator analysis and selection
+- Index construction and visualisation
+- Reweighting
+- Export
+
+# DEMO DATA
+
+The demo dataset comes from Guatemala
+
+```{r}
+
+## Adding demo data based on Guatemala
+
+# Run all this chunk in the console directly
+# Create "inst/" directory
+#dir.create(here::here("inst"))
+
+# Example dataset
+# Make your dataset file available to the current Rmd
+pkgload::load_all(path = here::here(), export_all = FALSE)
+
+# You will be able to read your example data file in each of your function examples and tests as follows
+example <- system.file("data_input/data_module-input.xlsx", package = "BuildIndex") 
+
+
+#data_module-input.xlsx
+  # coin <- f_data_input(here::here("inst/data_input", "data_module-input.xlsx"))
+  # 
+  # coin <- f_analyse_indicators(coin)
+  # 
+  # coin <- f_remove_indicators(coin, c("S.G.3", "A.M.1"))
+  # 
+  # coin <- f_build_index(coin)
+  # 
+  # coin <- f_change_weights(coin, w = list(Amenazas = 2, Cap_Resp = 0.5))
+```
+
+
+
+
+# MODULE 1: DATA INPUT
+
+
+**Objective**: To allow the user to input their data, which can then be used for the rest of the analysis.
+
+**Input(s)**: The only input here will be the input file. I think and Excel spreadsheet should be sufficient.
+
+**Output(s)**
+
+- Front end: confirmation of successful data entry, or else helpful error messages. Summary of what was input, e.g. number of indicators, number of units. Possibly a framework plot and/or a table of data.
+- Back end: An assembled coin.
+
+**Notes**
+
+- The input will have to be carefully constrained by using e.g. an Excel spreadsheet with a template that is quite restrictive of how users enter their data. I can also put some checks in Excel, e.g. to ensure numerical columns, etc. This template I think can be properly developed in the next contract/phase.
+- When data is uploaded into R, I will have to construct the iMeta and iData inputs, using a saved iMeta which defines the index structure
+- Will have to deal with any categories/dimensions that have no indicators in prior to assembling coin
+- We will need strict checks on unit codes if we want to use maps. E.g. unit codes are *required* to be those used as second level administrative divisions (admin2).
+- Do we need a units column?
+
+
+
+## Data input
+    
+```{r function-f_data_input}
+#' Data input
+#' 
+#' Outputs a constructed coin
+#' Reads an Excel file found at `file_path` which is expected to be in a specific
+#' format. See "inst/data_input/data_module-input.xlsx" for example.
+#' .
+#' 
+#' @param file_path path to the excel file where we have the raw data - organised
+#'      with the format exepected by COINR package
+#'      
+#' @importFrom readxl read_excel  cell_limits 
+#' @importFrom COINr new_coin   
+#' 
+#' @return coin object with a COINR class
+#' 
+#' @export
+f_data_input <- function(file_path){
+  
+   # Settings ----
+
+  # anchor points in spreadsheet
+  idata_topleft <- c(5, 1)
+  imeta_topleft <- c(1, 3)
+  imeta_botleft <- c(5, 3)
+
+  # col names to look for
+  ucode_name <- "admin2Pcode"
+  uname_name <- "Name"
+
+
+  # Read in data ----
+
+  iData <- readxl::read_excel(
+    path = file_path, sheet = "Data",
+    range = readxl::cell_limits(ul = idata_topleft, lr = c(NA, NA))
+    )
+  iMeta <- readxl::read_excel(
+    path = file_path, sheet = "Data",
+    range = readxl::cell_limits(ul = imeta_topleft,
+                        lr = c(imeta_botleft[1], NA)),
+    col_names = FALSE
+  ) |> suppressMessages()
+  
+  
+  ## @will Maybe need to do some format checking
+
+  # Tidy iData ----
+
+  names(iData)[names(iData) == ucode_name] <- "uCode"
+  names(iData)[names(iData) == uname_name] <- "uName"
+
+
+  # Tidy and merge metadata ----
+
+  # tidy existing
+  iMeta <- as.data.frame(t(iMeta))
+  names(iMeta) <- c("Weight", "Direction", "Parent", "iName", "iCode")
+  iMeta$Weight <- as.numeric(iMeta$Weight)
+  iMeta$Direction <- as.numeric(iMeta$Direction)
+  row.names(iMeta) <- NULL
+
+  # add cols (ready for merge)
+  iMeta$Level <- 1
+  iMeta$Type <- "Indicator"
+
+  # merge with aggregate levels
+  
+  ## @will - why not simply pulling this from the same excel ??
+  
+#  iMeta_aggs <- readRDS(here::here("inst/data_input", "iMeta_aggs.RDS"))
+ iMeta_aggs <- readRDS(system.file("data_input/iMeta_aggs.RDS", package = "BuildIndex") ) 
+  
+  iMeta <- rbind(iMeta, iMeta_aggs)
+
+
+  # Further tidying ----
+
+  # remove indicators with no data
+
+  i_nodata <- names(iData)[colSums(!is.na(iData)) == 0]
+  iData <- iData[!(names(iData) %in% i_nodata)]
+  iMeta <- iMeta[!(iMeta$iCode %in% i_nodata), ]
+
+  if(length(i_nodata) > 0){
+    message("Removed indicators with no data points: ",
+            paste0(i_nodata, collapse = ", "))
+  }
+
+  # remove any second-level groups with no children
+
+  no_children_1 <- iMeta$iCode[iMeta$Level == 2 & !(iMeta$iCode %in% iMeta$Parent)]
+  iMeta <- iMeta[!(iMeta$iCode %in% no_children_1), ]
+
+  if(length(no_children_1) > 0){
+    message("Removed categories containing no indicators: ",
+            paste0(no_children_1, collapse = ", "))
+  }
+
+  # remove any third-level groups with no children
+
+  no_children_2 <- iMeta$iCode[iMeta$Level == 3 & !(iMeta$iCode %in% iMeta$Parent)]
+  iMeta <- iMeta[!(iMeta$iCode %in% no_children_1), ]
+
+  if(length(no_children_2) > 0){
+    message("Removed dimensions containing no categories: ", no_children_2,
+            paste0(no_children_2, collapse = ", "))
+  }
+
+
+  # Build coin and output ----
+
+  coin <- COINr::new_coin(iData, iMeta, quietly = TRUE,
+           level_names = c("Indicator", "Category", "Dimension", "Index"))
+  
+  return(coin)
+    
+}
+```
+  
+```{r example-f_data_input}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+
+```
+  
+```{r tests-f_data_input}
+test_that("f_data_input works", {
+  expect_true(inherits(f_data_input, "function")) 
+})
+```
+  
+  
+## Print coin
+    
+```{r function-f_print_coin}
+#' Print Coin
+#'
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#' @param seg_cols A character vector of colour codes, one for each segment in 
+#'             the plot. The length of this #' vector must be equal to the number
+#'              of segments, i.e. the sum of the number of indicators and 
+#'              aggregates in each level.
+#' 
+#' 
+#' @return 
+#' 
+#' 
+#' @export
+
+f_print_coin <- function(coin){
+
+  cat("----------\n")
+  cat("Your data:\n")
+  cat("----------\n")
+  # Input
+  # Units
+  firstunits <- paste0(utils::head(coin$Data$Raw$uCode, 3), collapse = ", ")
+  if(length(coin$Data$Raw$uCode)>3){
+    firstunits <- paste0(firstunits, ", ...")
+  }
+
+  # Indicators
+  iCodes <- coin$Meta$Ind$iCode[coin$Meta$Ind$Type == "Indicator"]
+  firstinds <- paste0(utils::head(iCodes, 3), collapse = ", ")
+  if(length(iCodes)>3){
+    firstinds <- paste0(firstinds, ", ...")
+  }
+
+  cat("Input:\n")
+  cat("  Units: ", nrow(coin$Data$Raw), " (", firstunits, ")\n", sep = "")
+  cat(paste0("  Indicators: ", length(iCodes), " (", firstinds, ")\n\n"))
+
+  # Structure
+  fwk <- coin$Meta$Lineage
+
+  cat("Structure:\n")
+
+  for(ii in 1:ncol(fwk)){
+
+    codes <- unique(fwk[[ii]])
+    nuniq <- length(codes)
+    first3 <- utils::head(codes, 3)
+    if(length(codes)>3){
+      first3 <- paste0(first3, collapse = ", ")
+      first3 <- paste0(first3, ", ...")
+    } else {
+      first3 <- paste0(first3, collapse = ", ")
+    }
+
+    # colnames are level names
+    levnames <- colnames(fwk)
+    # check if auto-generated, if so we don't additionally print.
+    if(levnames[1] == "Level_1"){
+      levnames <- NULL
+    }
+
+    if(ii==1){
+      cat(paste0("  Level ", ii, " ", levnames[ii], ": ", nuniq, " indicators (", first3,") \n"))
+    } else {
+      cat(paste0("  Level ", ii, " ", levnames[ii], ": ", nuniq, " groups (", first3,") \n"))
+    }
+
+  }
+  cat("\n")
+    
+}
+```
+  
+```{r example-f_print_coin}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+f_print_coin(MVI)
+```
+  
+```{r tests-f_print_coin}
+test_that("f_print_coin works", {
+  expect_true(inherits(f_print_coin, "function")) 
+})
+```
+  
+  
+## f_plot_framework
+    
+```{r function-f_plot_framework}
+#' Interactive sunburst plot of index structure
+#'
+#' Plots the structure of the index using a sunburst plot using **plotly**.
+#'
+#' @param COIN COIN object, or list with first entry is the indicator metadata, second entry is the aggregation metadata
+#' @param seg_cols A character vector of colour codes, one for each segment in the plot. The length of this
+#' vector must be equal to the number of segments, i.e. the sum of the number of indicators and aggregates
+#' in each level. 
+#' 
+#' @importFrom plotly plot_ly
+#' @importFrom COINr get_eff_weights
+#' 
+#' @return fig as a plotly plot
+#' 
+#' @export
+f_plot_framework <- function(coin, seg_cols = NULL){
+
+  # get iMeta
+  iMeta <- coin$Meta$Ind
+
+  # check if EffWeight present, if not, get
+  if(is.null(iMeta$EffWeight)){
+    coin <- COINr::get_eff_weights(coin, out2 = "coin")
+    # get iMeta
+    iMeta <- coin$Meta$Ind[!is.na(coin$Meta$Ind$Parent), ]
+  }
+
+  #iMeta$EffWeight <- round(iMeta$EffWeight, 2)
+
+  if(is.null(seg_cols)){
+    fig <- plotly::plot_ly(
+      labels = iMeta$iCode,
+      parents = iMeta$Parent,
+      values = iMeta$EffWeight,
+      type = 'sunburst',
+      branchvalues = 'total'
+    )
+  } else {
+    stopifnot(is.vector(seg_cols),
+              is.character(seg_cols))
+    if(length(seg_cols) != length(outW$LabelsParents$Labels)){
+      stop("seg_cols is the wrong length: it needs to be a character vector of colour codes that is
+           the same length as the sum of all elements of the structure, in this case length should be ",
+                  length(outW$LabelsParents$Labels))
+    }
+    fig <- plotly::plot_ly(
+      labels = iMeta$iCode,
+      parents = iMeta$Parent,
+      values = iMeta$EffWeight,
+      type = 'sunburst',
+      branchvalues = 'total',
+      marker = list(colors = seg_cols)
+    )
+  }
+
+  return(fig)
+    
+}
+```
+  
+```{r example-f_plot_framework}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+f_plot_framework(MVI)
+```
+  
+```{r tests-f_plot_framework}
+test_that("f_plot_framework works", {
+  expect_true(inherits(f_plot_framework, "function")) 
+})
+```
+      
+
+# MODULE 2: Indicator analysis and selection
+
+
+**Objective**: To flag any statistical issues with indicators and allow the user to remove indicators if they want to (without having to edit their input file).
+
+**Input(s)**: This will be a two-stage process: the analysis and the indicator selection. For the former there is no input. For the latter the input will be any indicators to remove. In the code this will be a vector of indicator codes, but in app it will be selected interactively.
+
+**Output(s)**
+
+- Front: Analysis table at first step (as DT), probably a framework plot for the second. Details of indicators removed. We may also need e.g. box plot and/or scatter plot to help users visualise (tbd).
+- Back: Analysis table as data frame, then modified coin after removal of indicators, if any. Modified coin.
+
+**Notes**
+
+- Thinking ahead, we'll have to figure out what the best way to inform the user is when removing indicators. I would say maybe the framework plot here and maybe some before/after stats.
+- We will need to keep a record of which indicators were removed. In the app, we will need to save the indicator flags table somewhere so that it is also exported when everything else is.
+
+## Analyse indicators
+    
+```{r function-f_analyse_indicators}
+#' Analyse indicators 
+#' 
+#' Takes a coin and outputs an analysis of indicators. The objective is to look
+#' for any "statistically-problematic" indicators, based on:
+#' - data availability
+#' - high proportion of repeated data values
+#' - outliers as defined by skew and kurtosis
+#' - collinearity within first aggregation level (category)
+#' - negative correlation within first aggregation level (category)
+#' 
+#' The output can be viewed in R or as an interactive data frame.
+#' Uses Spearman rank correlation to deal with skewed distributions.
+#' Operates on the Raw data set.
+#' 
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#' 
+#' @return coin COIN object
+#' 
+#' @importFrom COINr get_stats get_corr_flags is.coin
+#' 
+#' @export
+f_analyse_indicators <- function(coin){
+
+  stopifnot(COINr::is.coin(coin))
+
+  # Settings ----
+
+  dat_avail_thresh <- 0.66
+  skew_thresh <- 2
+  kurt_thresh <- 3.5
+  same_thresh <- 0.5
+  collin_thresh <- 0.9
+  neg_corr_thresh <- -0.4
+
+  # Univariate stats ----
+
+  df_stats <- COINr::get_stats(
+    coin, dset = "Raw",
+    t_skew = skew_thresh,
+    t_kurt = kurt_thresh,
+    t_avail = dat_avail_thresh,
+    out2 = "df")
+
+  # prep df for display
+  df_disp <- df_stats[c("iCode", "Frc.Avail", "Frc.Same")]
+  # add skew and kurt
+  df_disp$SkewKurt <- paste0(signif(df_stats$Skew, 3)," / ", signif(df_stats$Kurt, 3))
+
+  # we find which iCodes are flagged for which things
+  # prep a df
+  df_flag <- data.frame(iCode = df_disp$iCode)
+
+  # in the flag df TRUE means it is flagged as having a problem
+  df_flag$Frc.Avail <- df_stats$Flag.Avail == "LOW"
+  df_flag$Frc.Same <- df_stats$Frc.Same > 0.5
+  df_flag$SkewKurt <- df_stats$Flag.SkewKurt == "OUT"
+
+  # Bivariate (correlations) ----
+
+  df_collinear <- COINr::get_corr_flags(
+    coin, dset = "Raw",
+    cor_thresh = collin_thresh,
+    thresh_type = "high",
+    grouplev = 2,
+    cortype = "spearman",
+    use_directions = TRUE)
+
+  df_flag$Collinear <- df_flag$iCode %in% c(df_collinear$Ind1, df_collinear$Ind2)
+
+  df_negcorr <- COINr::get_corr_flags(
+    coin, dset = "Raw",
+    cor_thresh = neg_corr_thresh,
+    thresh_type = "low",
+    grouplev = 2,
+    cortype = "spearman",
+    use_directions = TRUE)
+
+  df_flag$NegCorr <- df_flag$iCode %in% c(df_negcorr$Ind1, df_negcorr$Ind2)
+
+  # Tidy and output ----
+
+  # assemble a big table for viewing (to probably adjust yet)
+  df_disp <- df_disp[match(df_flag$iCode, df_disp$iCode), ]
+
+  # add correlation entries
+
+  pairs_colin <- f_gather_correlations(df_collinear)
+  df_disp$Collinear <- pairs_colin[match(df_disp$iCode, names(pairs_colin))]
+
+  pairs_neg <- f_gather_correlations(df_negcorr)
+  df_disp$NegCorr <- pairs_neg[match(df_disp$iCode, names(pairs_neg))]
+
+  # status column (will be changed if indicators are added/removed)
+  df_disp$Status <- "In"
+  df_flag$Status <- FALSE
+
+  # add outputs to coin
+  coin$Analysis$Raw <- list(
+    FlaggedStats = df_disp,
+    Flags = df_flag
+  )
+
+  return(coin)
+}
+```
+  
+```{r example-f_analyse_indicators}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+f_analyse_indicators(MVI)
+```
+  
+```{r tests-f_analyse_indicators}
+test_that("f_analyse_indicators works", {
+  expect_true(inherits(f_analyse_indicators, "function")) 
+})
+```
+  
+## Gather correlations
+    
+```{r function-f_gather_correlations}
+#' Gather correlations
+#' 
+#' Helper function for indicator analysis
+#' 
+#' @return
+#' 
+#' @export
+f_gather_correlations <- function(X){
+
+  Xpairs <- data.frame(v1 = c(X$Ind1, X$Ind2),
+                       v2 = c(X$Ind2, X$Ind1))
+
+  Xpairs <- Xpairs[order(Xpairs$v1, Xpairs$v2), ]
+
+  tapply(Xpairs$v2, Xpairs$v1, paste0, collapse = ", ")
+}
+```
+  
+```{r example-f_gather_correlations}
+#f_gather_correlations()
+```
+  
+```{r tests-f_gather_correlations}
+test_that("f_gather_correlations works", {
+  expect_true(inherits(f_gather_correlations, "function")) 
+})
+```
+
+## Display indicator analysis
+    
+```{r function-f_display_indicator_analysis}
+#' Display indicator analysis
+#' 
+#' Description
+#' 
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#'              
+#' @param  filter_to_flagged   TRUE or FALSE
+#' @importFrom COINr is.coin
+#' @importFrom rlang abort
+#' 
+#' @return
+#' 
+#' @export
+f_display_indicator_analysis <- function(coin, filter_to_flagged = TRUE){
+
+  stopifnot(COINr::is.coin(coin))
+
+  Xd <- coin$Analysis$Raw$FlaggedStats
+  Xh <- coin$Analysis$Raw$Flags
+
+  if(is.null(Xd) || is.null(Xh)){
+    rlang::abort("Indicator analysis not found in coin. Run f_analyse_indicators() first.")
+  }
+
+  if(filter_to_flagged){
+
+    # only include rows with at least one flag
+    include_rows <- rowSums( Xh[!(names(Xh) %in% c("iCode", "Status"))] ) > 0
+
+    Xd <- Xd[include_rows, ]
+    Xh <- Xh[include_rows, ]
+
+  }
+
+  f_highlight_DT(Xd, Xh)
+    
+}
+```
+  
+```{r example-f_display_indicator_analysis}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+
+MVI2 <- f_analyse_indicators(MVI)
+
+f_display_indicator_analysis(MVI2)
+```
+  
+```{r tests-f_display_indicator_analysis}
+test_that("f_display_indicator_analysis works", {
+  expect_true(inherits(f_display_indicator_analysis, "function")) 
+})
+```
+  
+  
+## Highlight Data Table
+    
+```{r function-f_highlight_DT}
+#' Highlight Data Table
+#' 
+#' Generic function for creating an interactive table with input df `Xd`, and
+#' with cells highlighted by an equivalently sized logical df `Xh`.
+#' This is used for displaying the output of `f_analyse_indicators()`.
+#' 
+#' @return
+#' 
+#' @export
+f_highlight_DT <- function(Xd, 
+                           Xh, 
+                           table_caption = NULL, 
+                           highlight_colour = "#ffc266"){
+
+  stopifnot(identical(dim(Xd), dim(Xh)))
+
+  ncol_display <- ncol(Xd)
+
+  Xh_numeric <- lapply(Xh, function(x){
+    if(is.logical(x)){
+      as.numeric(x)
+    } else {
+      x
+    }
+  }) |> as.data.frame()
+
+  X <- cbind(Xd, Xh_numeric)
+
+  styles <- c("white", highlight_colour)
+
+  DT::datatable(
+    X,
+    rownames = FALSE,
+    caption = table_caption,
+    options = list(
+      columnDefs = list(
+        list(
+          visible=FALSE,
+          targets=ncol_display:(ncol(X)-1)
+        )
+      )
+    )
+  ) |>
+    DT::formatStyle(
+      columns = 1:ncol_display,
+      valueColumns = (ncol_display + 1):ncol(X),
+      backgroundColor = DT::styleEqual(c(0,1), styles))
+    
+}
+```
+  
+```{r example-f_highlight_DT}
+#f_highlight_DT()
+```
+  
+```{r tests-f_highlight_DT}
+test_that("f_highlight_DT works", {
+  expect_true(inherits(f_highlight_DT, "function")) 
+})
+```
+  
+## Remove indicators
+    
+```{r function-f_remove_indicators}
+#' Remove indicators
+#' 
+#' Removes indicators as specified by a character vector of indicator
+#' codes in `remove_indicators`. After removal, any results are regenerated
+#' (updated).
+#' 
+#' The original data is always preserved so indicators can be restored.
+#' Analysis tables are not currently re-run so this has to be done separately.
+#' 
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#' @param remove_indicators  
+#' @importFrom COINr change_ind              
+#' 
+#' @return coin COIN object
+#' 
+#' @export
+f_remove_indicators <- function(coin, 
+                                remove_indicators = NULL){
+
+  # extract analysis
+  ind_analysis <- coin$Analysis$Raw
+  analysis_exists <- !is.null(ind_analysis)
+
+  coin <- COINr::change_ind(coin, drop = remove_indicators, regen = TRUE)
+
+  if(analysis_exists){
+    # edit and replace analysis
+    ind_analysis$FlaggedStats$Status[
+      ind_analysis$FlaggedStats$iCode %in% remove_indicators] <- "OUT"
+    ind_analysis$Flags$Status[
+      ind_analysis$Flags$iCode %in% remove_indicators] <- TRUE
+
+    coin$Analysis$Raw <- ind_analysis
+  }
+
+  if(!is.null(coin$Data$Aggregated)){
+    coin <- f_generate_results(coin)
+  }
+
+  return(coin)
+    
+}
+```
+  
+```{r example-f_remove_indicators}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+MVI2 <- f_analyse_indicators(MVI)
+MVI3 <- f_remove_indicators(MVI2, c("S.G.3", "A.M.1"))
+MVI3
+```
+  
+```{r tests-f_remove_indicators}
+test_that("f_remove_indicators works", {
+  expect_true(inherits(f_remove_indicators, "function")) 
+})
+```
+    
+        
+## Add indicators
+    
+```{r function-f_add_indicators}
+#' Add indicators
+#' 
+#'  As `f_remove_indicators()` but adds indicators back in. Obviously only
+#'  indicators that were originally present in the input data can be added.
+#' 
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#'              
+#' @param add_indicators              
+#' @importFrom COINr change_ind
+#' 
+#' @return coin COIN object
+#' 
+#' @export
+f_add_indicators <- function(coin, add_indicators = NULL){
+
+  # extract analysis
+  ind_analysis <- coin$Analysis$Raw
+  analysis_exists <- !is.null(ind_analysis)
+
+  coin <- COINr::change_ind(coin, add = add_indicators, regen = TRUE)
+
+  if(analysis_exists){
+    # edit and replace analysis
+    ind_analysis$FlaggedStats$Status[
+      ind_analysis$FlaggedStats$iCode %in% add_indicators] <- "In"
+    ind_analysis$Flags$Status[
+      ind_analysis$Flags$iCode %in% add_indicators] <- FALSE
+
+    coin$Analysis$Raw <- ind_analysis
+  }
+
+  if(!is.null(coin$Data$Aggregated)){
+    coin <- f_generate_results(coin)
+  }
+
+  return(coin)
+
+    
+}
+```
+  
+```{r example-f_add_indicators}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+
+f_add_indicators(MVI)
+```
+  
+```{r tests-f_add_indicators}
+test_that("f_add_indicators works", {
+  expect_true(inherits(f_add_indicators, "function")) 
+})
+```
+  
+
+# MODULE 3: Index construction and visualisation
+
+
+**Objective**: To build the index from the indicators selected in the previous step and show the results as table/map/bar chart.
+
+**Input(s)**: Possibly none from the user. If the methodology is fixed, there is no need for any input except perhaps which visualisation to use.
+
+**Output(s)**
+
+- Front: Results table, bar chart, map
+- Back: Modified coin.
+
+**Notes**
+
+The only thing to decide here is whether to give the user any control over the methodology. Essentially we *could* offer control at the treatment, normalisation or aggregation stages. However this would make things more confusing and also mean departing from a standardised methodology. The only case possibly worth considering is the outlier treatment for fringe cases which could cause an error. Another possibility is that we automate the data treatment so in case there is an error, that indicator is reverted back to its original state.
+
+## Build index
+    
+```{r function-f_build_index}
+#' Build index
+#' 
+#' this function builds the MVI. Assumes that at this point you have imported
+#' your data and built the MVI coin. Also optionally you have analysed and
+#' possibly removed indicators, but taken no further steps.
+#' 
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#'              
+#' @importFrom COINr is.coin qTreat Normalise Aggregate
+#' 
+#' @return coin COIN object
+#' 
+#' @export
+f_build_index <- function(coin){
+
+  stopifnot(COINr::is.coin(coin))
+
+  # Settings ----
+
+  max_winsorisation <- 5
+  skew_thresh <- 2
+  kurt_thresh <- 3.5
+
+  # treat outliers
+  coin <- COINr::qTreat(
+    coin, dset = "Raw",
+    winmax = max_winsorisation,
+    skew_thresh = skew_thresh,
+    kurt_thresh = kurt_thresh,
+    f2 = "log_CT_plus")
+
+  # normalise to [0, 100]
+  coin <- COINr::Normalise(coin, dset = "Treated")
+
+  # aggregate using weighted arithmetic mean
+  coin <- COINr::Aggregate(coin, dset = "Normalised")
+
+  # generate results tables
+  coin <- f_generate_results(coin)
+
+  return(coin)
+    
+}
+```
+  
+```{r example-f_build_index}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+
+f_build_index(coin = MVI)
+```
+  
+```{r tests-f_build_index}
+test_that("f_build_index works", {
+  expect_true(inherits(f_build_index, "function")) 
+})
+```
+  
+## Display results table
+    
+```{r function-f_display_results_table}
+#' Display results table
+#' 
+#' Outputs an interactive results table suitable for HTML documents and the app.
+#' .
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#' 
+#' @param type set type = "scores" or "ranks"
+#' @importFrom rlang abort
+#' @return a visualised data table
+#' 
+#' @export
+f_display_results_table <- function(coin, type = "scores"){
+
+  if(type == "scores"){
+    df_results <- coin$Results$FullScore
+  } else if (type == "ranks"){
+    df_results <- coin$Results$FullRank
+  }
+
+  if(is.null(df_results)){
+    rlang::abort("Can't find results in the coin. Did you forget to build the index first?")
+  }
+
+  df_results |>
+    DT::datatable() |>
+    DT::formatStyle(columns = ncol(df_results),
+                fontSize = '50%')
+    
+}
+```
+  
+```{r example-f_display_results_table}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+
+MVI2 <- f_build_index(coin = MVI)
+f_display_results_table(coin = MVI2)
+```
+  
+```{r tests-f_display_results_table}
+test_that("f_display_results_table works", {
+  expect_true(inherits(f_display_results_table, "function")) 
+})
+```
+
+## Plot map
+    
+```{r function-f_plot_map}
+#' Plot map
+#' 
+#' Plots an interactive choropleth map of the index or any indicator, using 
+#' supplied shape files.
+#' 
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#' 
+#' 
+#' @param shp_path is currently at "shp/gtm_admbnda_adm2_ocha_conred_20190207.shp"
+#' @importFrom COINr get_data
+#' @importFrom sf read_sf
+#' @importFrom leaflet leaflet labelOptions highlightOptions addTiles addLegend
+#' @return
+#' 
+#' @export
+f_plot_map <- function(coin, 
+                       dset = "Aggregated",
+                       iCode = "MVI", 
+                       shp_path){
+
+ # shp <- read_sf("shp/gtm_admbnda_adm2_ocha_conred_20190207.shp")
+  
+  
+  shp <- sf::read_sf(shp_path)
+  
+
+  # get data first
+  df_plot <- COINr::get_data(coin, dset = dset, iCodes = iCode)
+
+  # merge into shape df
+  shp$Indicator <- df_plot[[iCode]][match(shp$ADM2_PCODE, df_plot$uCode)]
+
+  # colorBin is a leaflet function
+  pal <- leaflet::colorBin("YlOrRd", domain = shp$Indicator, bins = 7)
+
+  # labels
+  labels <- sprintf(
+    "<strong>%s</strong><br/>%g",
+    shp$ADM2_ES, round(shp$Indicator, 1)
+  ) |>
+    lapply(htmltools::HTML)
+
+
+  # now we can make the map
+
+  mp <- leaflet::leaflet(shp) |>
+    leaflet::addTiles() |>
+    leaflet::addPolygons(
+      fillColor = ~pal(Indicator),
+      weight = 2,
+      opacity = 1,
+      color = "white",
+      dashArray = "3",
+      fillOpacity = 0.7,
+      highlightOptions = leaflet::highlightOptions(
+        weight = 5,
+        color = "#666",
+        dashArray = "",
+        fillOpacity = 0.7,
+        bringToFront = TRUE),
+      label = labels,
+      labelOptions = leaflet::labelOptions(
+        style = list("font-weight" = "normal", padding = "3px 8px"),
+        textsize = "15px",
+        direction = "auto")) |>
+    leaflet::addLegend(pal = pal, values = ~Indicator, opacity = 0.7, title = NULL,
+              position = "bottomright")
+
+  mp
+    
+}
+```
+  
+```{r example-f_plot_map}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+
+MVI2 <- f_build_index(coin = MVI)
+
+f_plot_map(coin = MVI2, 
+           dset = "Aggregated",
+           iCode = "MVI", 
+           shp_path = system.file("shp/gtm_admbnda_adm2_ocha_conred_20190207.shp",
+                                            package = "BuildIndex")  )
+## when using ut your shape in the folder ---
+         #  shp_path = here::here("inst/shp", "gtm_admbnda_adm2_ocha_conred_20190207.shp")           )
+```
+  
+```{r tests-f_plot_map}
+test_that("f_plot_map works", {
+  expect_true(inherits(f_plot_map, "function")) 
+})
+```
+      
+## Generate results
+    
+```{r function-f_generate_results}
+#' Generate results
+#' 
+#' Generates sorted results tables and attaches back to the coin
+#' 
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#'              
+#' @importFrom COINr is.coin get_results
+#' @return coin COIN object
+#' 
+#' @export
+f_generate_results <- function(coin){
+
+  stopifnot(COINr::is.coin(coin),
+            !is.null(coin$Data$Aggregated))
+
+  # generate results tables (attached to coin, so will appear when exported to Excel)
+  coin <- COINr::get_results(coin, dset = "Aggregated", tab_type = "Full",
+                      also_get = "uName", nround = 1, out2 = "coin")
+  coin <- COINr::get_results(coin, dset = "Aggregated", tab_type = "Full", use = "ranks",
+                      also_get = "uName", nround = 1, out2 = "coin")
+
+  return(coin)
+    
+}
+```
+  
+```{r example-f_generate_results}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+
+MVI2 <- f_build_index(coin = MVI)
+
+f_generate_results(coin = MVI2)
+```
+  
+```{r tests-f_generate_results}
+test_that("f_generate_results works", {
+  expect_true(inherits(f_generate_results, "function")) 
+})
+```
+  
+
+# MODULE 4: Reweighting
+
+
+**Objective**: To allow users to adjust weights manually to their preferences, and see the results interactively change.
+
+**Input(s)**: Weights - which can be just at dimension level, or at dimension and category level. Would not recommend allowing indicator-level adjustment because it would result in a messy UI and probably confusion for the user.
+
+**Output(s)**
+
+- Front: Table of results. Possibly compared side by side with the un-altered results.
+- Back: Modified coin plus data frame output of results.
+
+**Notes**
+
+- The question is: when a user adjusts weights do we retain a parallel copy of the index with the original weights which can be used for comparison? Or should everything update? I think possibly the latter if we want to keep the weight adjustment on the same tab as the results visualisations.
+- We will anyway need a reset button to reset to original weights.
+
+## Change weights
+    
+```{r function-f_change_weights}
+#' Change weights
+#' 
+#' Function that takes some new weights and regenerates the coin.
+#' 
+#'
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#' @param w weight. The weights `w` can either be a named list with names as iCodes
+#'           and values the new weights, OR 
+#'           as a data frame with columns "iCode" and "Weight" with 
+#'           codes and corresponding weights.   
+#'           In both cases a subset of weight-code pairs can be specified.
+#'          E.g. `list("Salud" = 0.5, Amenazas = 0.8)`.
+#' 
+#'          OR set w = "equal" for equal weights everywhere, or w = "original" to use the
+#'           weights that were input with the input data.
+#' 
+#'           Remember that weights are relative within aggregation groups.          
+#' @importFrom COINr is.coin Regen
+#' @importFrom rlang abort
+#' @return coin COIN object
+#' 
+#' @export
+f_change_weights <- function(coin, w){
+
+  stopifnot(COINr::is.coin(coin))
+
+  if(is.null(coin$Data$Aggregated)){
+    rlang::abort("Can't find results in the coin. Did you forget to build the index first?")
+  }
+
+  # Get weights that were last used to aggregate ----
+
+  # special case: reset or make equal
+  if(is.character(w)){
+
+    stopifnot(length(w) == 1)
+
+    if(w == "equal"){
+      w_new <- f_get_equal_weights(coin)
+    } else if (w == "original"){
+      w_new <- coin$Meta$Weights$Original
+    }
+
+    coin$Log$Aggregate$w <- w_new
+    return(COINr::Regen(coin, from = "Aggregate"))
+  }
+
+  w_new <- f_get_last_weights(coin)
+
+  # Alter weights based on input type ----
+
+  if(is.data.frame(w)){
+
+    stopifnot(all(c("iCode", "Weight") %in% names(w)),
+              all(w$iCode %in% w_new$iCode),
+              is.numeric(w$Weight))
+
+    # subst new weights in
+    w_new$Weight[match(w$iCode, w_new$iCode)] <- w$Weight
+
+  } else if (is.list(w)){
+
+    stopifnot(all(names(w) %in% w_new$iCode),
+              all(sapply(w, is.numeric)),
+              all(lengths(w) == 1))
+
+    # subst new weights in
+    w_new$Weight[match(names(w), w_new$iCode)] <- as.numeric(w)
+
+  }
+
+  # Regen with new weights ----
+
+  coin$Log$Aggregate$w <- w_new
+
+  # extract analysis
+  ind_analysis <- coin$Analysis$Raw
+  analysis_exists <- !is.null(ind_analysis)
+
+  coin <- COINr::Regen(coin, from = "Aggregate")
+
+  if(analysis_exists){
+    coin$Analysis$Raw <- ind_analysis
+  }
+
+  # generate results tables again
+  coin <- f_generate_results(coin)
+
+  return(coin)
+    
+}
+```
+  
+```{r example-f_change_weights}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+MVI2 <- f_analyse_indicators(coin = MVI)
+MVI3 <- f_build_index(coin = MVI2)
+MVI4 <- f_change_weights(coin = MVI3, w= list(Amenazas = 2, Cap_Resp = 0.5))
+MVI4
+```
+  
+```{r tests-f_change_weights}
+test_that("f_change_weights works", {
+  expect_true(inherits(f_change_weights, "function")) 
+})
+```
+  
+## Get equal weights
+    
+```{r function-f_get_equal_weights}
+#' Get equal weights
+#' 
+#' Description
+#' 
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#' @return w weight 
+#' 
+#' @export
+f_get_equal_weights <- function(coin){
+
+  w <- coin$Meta$Weights$Original
+  stopifnot(!is.null(w))
+
+  w$Weight <- 1
+
+  return(w)
+    
+}
+```
+  
+```{r example-f_get_equal_weights}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+MVI2 <- f_analyse_indicators(coin = MVI)
+MVI3 <- f_remove_indicators(coin = MVI2, c("S.G.3", "A.M.1"))
+MVI4 <- f_build_index(coin = MVI3)
+weight <- f_get_equal_weights(coin = MVI4)
+weight
+```
+  
+```{r tests-f_get_equal_weights}
+test_that("f_get_equal_weights works", {
+  expect_true(inherits(f_get_equal_weights, "function")) 
+})
+```
+  
+  
+## Get last weights
+    
+```{r function-f_get_last_weights}
+#' Get last weights
+#' 
+#' Description
+#' 
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#' @return w weight 
+#' @importFrom rlang abort
+#' @export
+f_get_last_weights <- function(coin){
+
+  if(is.null(coin$Log$Aggregate)){
+    return(NULL)
+  }
+
+  w_log <- coin$Log$Aggregate$w
+
+  if(is.null(w_log)){
+
+    w_new <- coin$Meta$Weights$Original
+
+  } else if (is.character(w_log)){
+
+    w_new <- coin$Meta$Weights[[w_log]]
+
+  } else if (is.data.frame(w_log)){
+
+    w_new <- w_log
+  } else {
+    rlang::abort("Weights not recognised at coin$Log$Aggregate$w")
+  }
+
+  stopifnot(is.data.frame(w_new))
+
+  return(w_new)
+    
+}
+```
+  
+```{r example-f_get_last_weights}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+MVI2 <- f_analyse_indicators(MVI)
+MVI3 <- f_build_index(coin = MVI2)
+weight <- f_get_last_weights(MVI3)
+weight 
+```
+  
+```{r tests-f_get_last_weights}
+test_that("f_get_last_weights works", {
+  expect_true(inherits(f_get_last_weights, "function")) 
+})
+```
+      
+
+
+# MODULE 5: Export
+
+
+**Objective**: To export all results to Excel.
+
+**Input(s)**: Just the command to export.
+
+**Output(s)**
+
+- Front: An Excel spreadsheet with results.
+- Back: None
+
+**Notes**
+
+COINr has a function to export to Excel. However we will need to adjust this because it currently outputs everything in the coin. Instead we want a simplified output which has the main results, a record of which indicators were selected, weights used, and probably the data sets generated at each construction stage for the record.
+
+In more detail let's say we probably want the following:
+
+- Results table (scores)
+- Results table (ranks)
+- Analysis table
+- Indicators included: possibly the lineage table
+- Weights used
+- Data sets at each stage
+
+## Export to excel
+    
+```{r function-f_export_to_excel}
+#' Export to excel
+#' 
+#' Simplified export to Excel with some formatting
+#' Note if we change the index structure this may need adjusting.
+#' 
+#' 
+#' @param coin COIN object, or list with first entry is the indicator metadata, 
+#'              second entry is the aggregation metadata
+#' @param fname file name
+#' 
+#' @importFrom RColorBrewer brewer.pal
+#' @importFrom openxlsx createWorkbook addWorksheet writeData writeDataTable
+#'               conditionalFormatting saveWorkbook
+#'               
+#' @return
+#' 
+#' @export
+f_export_to_excel <- function(coin, fname = "index_export.xlsx"){
+
+  l <- list()
+
+  # Results
+  l$Scores <- coin$Results$FullScore
+  l$Ranks <- coin$Results$FullRank
+
+  # Structure
+  l$Structure <- coin$Meta$Lineage
+
+  # Analysis
+  l$Analysis <- coin$Analysis$Raw$FlaggedStats
+
+  # Weights
+  l$Weights <- f_get_last_weights(coin)
+
+  # Data sets
+  l <- c(l, coin$Data)
+
+  # colours
+  tab_colours <- list(
+    Results = "green",
+    Structure = "orange",
+    Analysis = "blue",
+    Weights = "yellow",
+    Other = "grey"
+  )
+
+  # Write
+  wb <- openxlsx::createWorkbook()
+
+  options("openxlsx.borderStyle" = "thin")
+  options("openxlsx.borderColour" = "white")
+
+  lapply(names(l), function(s){
+
+    if(s %in% c("Scores", "Ranks")){
+
+      openxlsx::addWorksheet(wb, s, tabColour = tab_colours[["Results"]])
+      openxlsx::writeData(wb, sheet = s, x = l[[s]])
+      openxlsx::writeDataTable(wb, s, x = l[[s]],
+                     tableStyle = "TableStyleMedium6",
+                     bandedRows = FALSE)
+
+      r_format <- 2: (nrow(l[[s]]) + 1)
+
+      if(s == "Scores"){
+
+        # index score
+        openxlsx::conditionalFormatting(
+          wb, s, cols = 4, rows = r_format,
+          type = "databar")
+
+        # Mov_Hum
+        # cols = c(5, 16)
+        openxlsx::conditionalFormatting(
+          wb, s, cols = 5, rows = r_format,
+          style = RColorBrewer::brewer.pal(n = 3, name = "YlOrRd"),
+          type = "colourScale")
+
+        # Amenazas
+        # c(6, 9, 10)
+        openxlsx::conditionalFormatting(
+          wb, s, cols = 6, rows = r_format,
+          style = RColorBrewer::brewer.pal(n = 3, name = "RdPu"),
+          type = "colourScale")
+
+        # Sit_SocEc
+        # c(7, 17:20)
+        openxlsx::conditionalFormatting(
+          wb, s, cols = 7, rows = r_format,
+          style = RColorBrewer::brewer.pal(n = 3, name = "PuBuGn"),
+          type = "colourScale")
+
+        # Sit_SocEc
+        # cols = c(8, 11:15)
+        openxlsx::conditionalFormatting(
+          wb, s, cols = 8, rows = r_format,
+          style = RColorBrewer::brewer.pal(n = 3, name = "YlGnBu"),
+          type = "colourScale")
+
+      }
+
+    } else if (s %in% c("Structure", "Analysis", "Weights")) {
+
+      openxlsx::addWorksheet(wb, s, tabColour = tab_colours[[s]])
+      openxlsx::writeData(wb, sheet = s, x = l[[s]])
+
+    } else {
+
+      openxlsx::addWorksheet(wb, s, tabColour = tab_colours[["Other"]])
+      openxlsx::writeData(wb, sheet = s, x = l[[s]])
+    }
+
+  })
+
+  # write to excel
+  openxlsx::saveWorkbook(wb, fname, overwrite = TRUE)
+}
+```
+  
+```{r example-f_export_to_excel}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+## when using create a data-raw folder and put you data input xlsx file there
+# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+MVI2 <- f_analyse_indicators(coin = MVI)
+MVI3 <- f_build_index(coin = MVI2)
+
+f_export_to_excel(coin = MVI3, 
+                  fname = here::here("inst", "index_export.xlsx"))
+```
+  
+```{r tests-f_export_to_excel}
+test_that("f_export_to_excel works", {
+  expect_true(inherits(f_export_to_excel, "function")) 
+})
+```
+  
+# Generate technical report
+    
+```{r function-f_export_report}
+#' Title
+#' 
+#' 
+#' 
+# usethis::use_rmarkdown_template(
+#   template_name = "Index_report",
+#   template_dir = NULL,
+#   template_description = "Index Review Report - html",
+#   template_create_dir = TRUE
+# )
+#' 
+#' @return
+#' 
+#' @export
+f_export_report <- function(){
+  
+    
+}
+```
+  
+```{r example-f_export_report}
+f_export_report()
+```
+  
+```{r tests-f_export_report}
+test_that("f_export_report works", {
+  expect_true(inherits(f_export_report, "function")) 
+})
+```
+    
+  
+  
+  
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/severity_index.Rmd", vignette_name = "All functions", overwrite = 'yes')
+```
+

@@ -1,0 +1,40 @@
+Type: Package
+Package: BuildIndex
+Title: Build Index using COINR approach
+Version: 0.0.1
+Authors@R: c(
+    person("William", "Becker", , "william.becker@bluefoxdata.eu", role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0002-6467-4472")),
+    person("Edouard", "Legoupil", , "legoupil@unhcr.org", role = "ctb")
+  )
+Maintainer: William Becker <william.becker@bluefoxdata.eu>
+Description: .
+License: MIT + file LICENSE
+Imports: 
+    COINr,
+    dplyr,
+    DT,
+    here,
+    htmltools,
+    leaflet,
+    openxlsx,
+    plotly,
+    RColorBrewer,
+    readxl,
+    rgdal,
+    rlang,
+    sf,
+    utils
+Suggests: 
+    knitr,
+    pkgload,
+    rmarkdown,
+    testthat
+VignetteBuilder: 
+    knitr
+Remotes: 
+    vidonne/unhcrdown,
+    vidonne/unhcrthemes
+Encoding: UTF-8
+LazyData: TRUE
+RoxygenNote: 7.2.3

@@ -9,8 +9,8 @@ build_MVI_coin <- function(){
 
   # Import data
 
-  idata <- read_excel("data_input/data_input_formatted.xlsx", sheet = "iData")
-  imeta <- read_excel("data_input/data_input_formatted.xlsx", sheet = "iMeta")
+  idata <- read_excel(here::here("inst/data_input","data_input_formatted.xlsx"), sheet = "iData")
+  imeta <- read_excel(here::here("inst/data_input","data_input_formatted.xlsx"), sheet = "iMeta")
 
   # Tidy up inputs (see func below to see what this does if you want to know)
   l <- tidy_inputs(idata, imeta)

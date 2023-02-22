@@ -3,7 +3,7 @@
 library(leaflet)
 library(rgdal)
 # shape files in working directory for now
-guat <- readOGR("shp/gtm_admbnda_adm2_ocha_conred_20190207.shp")
+guat <- readOGR(here::here("inst/shp","gtm_admbnda_adm2_ocha_conred_20190207.shp"))
 
 # "guat" is a "SpatialPolygonsDataFrame" object which behaves like a data frame in many ways
 # but has lots of other stuff attached
