@@ -8,6 +8,8 @@
 #' 
 #' @param coin COIN object, or list with first entry is the indicator metadata, 
 #'              second entry is the aggregation metadata
+#' @param agg_method One of `"a_amean"` (arithmetic mean), `"a_gmean"` (geometric mean),
+#' `"a_bod"` (benefit of doubt via Compind package) or `"a_wroclaw"` (Wroclaw Taxonomic Method via Compind).
 #'              
 #' @importFrom COINr is.coin qTreat Normalise Aggregate
 #' 
@@ -22,11 +24,22 @@
 #' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
 #' 
 #' f_build_index(coin = MVI)
-f_build_index <- function(coin){
+f_build_index <- function(coin, agg_method = "a_amean"){
 
   stopifnot(COINr::is.coin(coin))
+  
+  # If bod method, we can't proceed if any groups with only one child (throws error in compind)
+  if(agg_method %in% c("a_bod", "a_wroclaw")){
+    solo_groups <- get_solo_groups(coin)
+    if(length(solo_groups) > 1){
+      rlang::abort(
+        paste0(
+          c("Cannot use benefit of doubt or Wroclaw methods because some framework groups have only one child: ", solo_groups),
+          collapse = " "))
+    }
+  }
 
-  # Settings ----
+  # Settings
 
   max_winsorisation <- 5
   skew_thresh <- 2
@@ -40,11 +53,26 @@ f_build_index <- function(coin){
     kurt_thresh = kurt_thresh,
     f2 = "log_CT_plus")
 
-  # normalise to [0, 100]
-  coin <- COINr::Normalise(coin, dset = "Treated")
+  # normalise to [1, 100]: otherwise if we have zeros can't use geometric mean
+  coin <- COINr::Normalise(
+    coin, 
+    dset = "Treated",
+    global_specs = list(f_n = "n_minmax",
+                        f_n_para = list(l_u = c(1, 100)))
+  )
 
-  # aggregate using weighted arithmetic mean
-  coin <- COINr::Aggregate(coin, dset = "Normalised")
+  # AGGREGATE
+  
+  # some methods don't require weights input
+  if(agg_method == "a_bod"){
+    w <- "none"
+    by_df <- TRUE
+  } else {
+    w <- NULL
+    by_df <- FALSE
+  }
+  
+  coin <- COINr::Aggregate(coin, dset = "Normalised", f_ag = agg_method, w = w, by_df = by_df)
 
   # generate results tables
   coin <- f_generate_results(coin)

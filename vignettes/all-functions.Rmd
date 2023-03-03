@@ -316,6 +316,48 @@ f_build_index(coin = MVI)
 
   
 
+# a_bod
+
+    
+
+  
+
+```{r example-a_bod}
+#
+```
+
+  
+
+# a_wroclaw
+
+    
+
+  
+
+```{r example-a_wroclaw}
+#
+```
+
+  
+
+  
+
+
+# get_solo_groups
+
+    
+
+  
+
+```{r example-get_solo_groups}
+#
+```
+
+  
+
+  
+
+
 ## Display results table
 
     
@@ -520,7 +562,20 @@ f_export_to_excel(coin = MVI3,
   
 
   
+
+# Generate technical report
+
+    
+
   
+
+```{r example-f_export_report}
+f_export_report()
+```
+
+  
+
+    
   
   
   

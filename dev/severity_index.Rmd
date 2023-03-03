@@ -861,17 +861,30 @@ The only thing to decide here is whether to give the user any control over the m
 #' 
 #' @param coin COIN object, or list with first entry is the indicator metadata, 
 #'              second entry is the aggregation metadata
+#' @param agg_method One of `"a_amean"` (arithmetic mean), `"a_gmean"` (geometric mean),
+#' `"a_bod"` (benefit of doubt via Compind package) or `"a_wroclaw"` (Wroclaw Taxonomic Method via Compind).
 #'              
 #' @importFrom COINr is.coin qTreat Normalise Aggregate
 #' 
 #' @return coin COIN object
 #' 
 #' @export
-f_build_index <- function(coin){
+f_build_index <- function(coin, agg_method = "a_amean"){
 
   stopifnot(COINr::is.coin(coin))
+  
+  # If bod method, we can't proceed if any groups with only one child (throws error in compind)
+  if(agg_method %in% c("a_bod", "a_wroclaw")){
+    solo_groups <- get_solo_groups(coin)
+    if(length(solo_groups) > 1){
+      rlang::abort(
+        paste0(
+          c("Cannot use benefit of doubt or Wroclaw methods because some framework groups have only one child: ", solo_groups),
+          collapse = " "))
+    }
+  }
 
-  # Settings ----
+  # Settings
 
   max_winsorisation <- 5
   skew_thresh <- 2
@@ -885,11 +898,26 @@ f_build_index <- function(coin){
     kurt_thresh = kurt_thresh,
     f2 = "log_CT_plus")
 
-  # normalise to [0, 100]
-  coin <- COINr::Normalise(coin, dset = "Treated")
+  # normalise to [1, 100]: otherwise if we have zeros can't use geometric mean
+  coin <- COINr::Normalise(
+    coin, 
+    dset = "Treated",
+    global_specs = list(f_n = "n_minmax",
+                        f_n_para = list(l_u = c(1, 100)))
+  )
 
-  # aggregate using weighted arithmetic mean
-  coin <- COINr::Aggregate(coin, dset = "Normalised")
+  # AGGREGATE
+  
+  # some methods don't require weights input
+  if(agg_method %in% c("a_bod", "a_wroclaw")){
+    w <- "none"
+    by_df <- TRUE
+  } else {
+    w <- NULL
+    by_df <- FALSE
+  }
+  
+  coin <- COINr::Aggregate(coin, dset = "Normalised", f_ag = agg_method, w = w, by_df = by_df)
 
   # generate results tables
   coin <- f_generate_results(coin)
@@ -915,6 +943,84 @@ test_that("f_build_index works", {
 })
 ```
   
+# a_bod
+    
+```{r function-a_bod}
+#' Benefit of doubt aggregation
+#' 
+#' As used in compind package
+#' 
+#' @param x A numeric vector
+#' 
+#' @export
+a_bod <- function(x){
+  suppressMessages(Compind::ci_bod(x)$ci_bod_est)
+}
+```
+  
+```{r example-a_bod}
+#
+```
+  
+```{r tests-a_bod}
+test_that("a_bod works", {
+  expect_true(inherits(a_bod, "function")) 
+})
+```
+
+# a_wroclaw
+    
+```{r function-a_wroclaw}
+#' Wroclaw Taxonomic aggregation
+#' 
+#' As used in Compind package
+#' 
+#' @noRd
+a_wroclaw <- function(x){
+  suppressMessages(Compind::ci_wroclaw(x)$ci_wroclaw_est) |>
+    as.numeric()
+}
+```
+  
+```{r example-a_wroclaw}
+#
+```
+  
+```{r tests-a_wroclaw}
+test_that("a_wroclaw works", {
+  expect_true(inherits(a_wroclaw, "function")) 
+})
+```
+  
+
+# get_solo_groups
+    
+```{r function-get_solo_groups}
+#' Codes of any groups with only one child
+#' 
+#' To avoid errors in bod.
+#' 
+#' @param coin The coin
+#' 
+#' @noRd
+get_solo_groups <- function(coin){
+  imeta <- coin$Meta$Ind
+  parents <- imeta$Parent[!is.na(imeta$Parent)]
+  x[which(!(duplicated(x) | duplicated(x, fromLast = TRUE)))]
+}
+```
+  
+```{r example-get_solo_groups}
+#
+```
+  
+```{r tests-get_solo_groups}
+test_that("get_solo_groups works", {
+  expect_true(inherits(get_solo_groups, "function")) 
+})
+```
+  
+
 ## Display results table
     
 ```{r function-f_display_results_table}
@@ -1561,6 +1667,6 @@ test_that("f_export_report works", {
 ```{r development-inflate, eval=FALSE}
 # Run but keep eval=FALSE to avoid infinite loop
 # Execute in the console directly
-fusen::inflate(flat_file = "dev/severity_index.Rmd", vignette_name = "All functions", overwrite = 'yes')
+fusen::inflate(flat_file = "dev/severity_index.Rmd", vignette_name = "All functions", overwrite = 'yes', check = FALSE)
 ```
 

@@ -4,11 +4,14 @@
 \alias{f_build_index}
 \title{Build index}
 \usage{
-f_build_index(coin)
+f_build_index(coin, agg_method = "a_amean")
 }
 \arguments{
 \item{coin}{COIN object, or list with first entry is the indicator metadata, 
 second entry is the aggregation metadata}
+
+\item{agg_method}{One of `"a_amean"` (arithmetic mean), `"a_gmean"` (geometric mean),
+`"a_bod"` (benefit of doubt via Compind package) or `"a_wroclaw"` (Wroclaw Taxonomic Method via Compind).}
 }
 \value{
 coin COIN object
