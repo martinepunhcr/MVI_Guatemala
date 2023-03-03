@@ -28,16 +28,16 @@ f_build_index <- function(coin, agg_method = "a_amean"){
 
   stopifnot(COINr::is.coin(coin))
   
-  # If bod method, we can't proceed if any groups with only one child (throws error in compind)
-  if(agg_method %in% c("a_bod", "a_wroclaw")){
-    solo_groups <- get_solo_groups(coin)
-    if(length(solo_groups) > 1){
-      rlang::abort(
-        paste0(
-          c("Cannot use benefit of doubt or Wroclaw methods because some framework groups have only one child: ", solo_groups),
-          collapse = " "))
-    }
-  }
+  # # If bod method, we can't proceed if any groups with only one child (throws error in compind)
+  # if(agg_method %in% c("a_bod", "a_wroclaw")){
+  #   solo_groups <- get_solo_groups(coin)
+  #   if(length(solo_groups) > 1){
+  #     rlang::abort(
+  #       paste0(
+  #         c("Cannot use benefit of doubt or Wroclaw methods because some framework groups have only one child: ", solo_groups),
+  #         collapse = " "))
+  #   }
+  # }
 
   # Settings
 
@@ -64,7 +64,7 @@ f_build_index <- function(coin, agg_method = "a_amean"){
   # AGGREGATE
   
   # some methods don't require weights input
-  if(agg_method == "a_bod"){
+  if(agg_method %in% c("a_bod", "a_wroclaw")){
     w <- "none"
     by_df <- TRUE
   } else {

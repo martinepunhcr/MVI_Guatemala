@@ -8,5 +8,9 @@
 #' @examples
 #' #
 a_wroclaw <- function(x){
-  suppressMessages(Compind::ci_wroclaw(x)$ci_wroclaw_est)
+  if(ncol(x) == 1){
+    return(x[[1]])
+  }
+  suppressMessages(Compind::ci_wroclaw(x)$ci_wroclaw_est) |>
+    as.numeric()
 }
