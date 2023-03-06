@@ -4,6 +4,7 @@
 #' 
 #' Takes a coin and outputs an analysis of indicators. The objective is to look
 #' for any "statistically-problematic" indicators, based on:
+#' 
 #' - data availability
 #' - high proportion of repeated data values
 #' - outliers as defined by skew and kurtosis
@@ -14,10 +15,12 @@
 #' Uses Spearman rank correlation to deal with skewed distributions.
 #' Operates on the Raw data set.
 #' 
-#' @param coin COIN object, or list with first entry is the indicator metadata, 
-#'              second entry is the aggregation metadata
+#' The output is a coin with the results attached. This is so that on export, the
+#' results will also be exported easily.
 #' 
-#' @return coin COIN object
+#' @param coin The coin
+#' 
+#' @return coin Updated coin with analysis tables
 #' 
 #' @importFrom COINr get_stats get_corr_flags is.coin
 #' 
@@ -26,9 +29,8 @@
 #' MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
 #'                                             package = "BuildIndex") )
 #' 
-#' ## when using create a data-raw folder and put you data input xlsx file there
-#' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
-#' f_analyse_indicators(MVI)
+#' 
+#' MVI <- f_analyse_indicators(MVI)
 f_analyse_indicators <- function(coin){
 
   stopifnot(COINr::is.coin(coin))

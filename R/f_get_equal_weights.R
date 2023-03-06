@@ -2,24 +2,15 @@
 
 #' Get equal weights
 #' 
-#' Description
+#' Returns a weight data frame of equal weights. Helper called by [f_change_weights()].
 #' 
-#' @param coin COIN object, or list with first entry is the indicator metadata, 
-#'              second entry is the aggregation metadata
-#' @return w weight 
+#' @param coin The coin
+#' 
+#' @return A data frame of weights. 
 #' 
 #' @export
 #' @examples
-#' MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
-#'                                             package = "BuildIndex") )
-#' 
-#' ## when using create a data-raw folder and put you data input xlsx file there
-#' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
-#' MVI2 <- f_analyse_indicators(coin = MVI)
-#' MVI3 <- f_remove_indicators(coin = MVI2, c("S.G.3", "A.M.1"))
-#' MVI4 <- f_build_index(coin = MVI3)
-#' weight <- f_get_equal_weights(coin = MVI4)
-#' weight
+#' #
 f_get_equal_weights <- function(coin){
 
   w <- coin$Meta$Weights$Original

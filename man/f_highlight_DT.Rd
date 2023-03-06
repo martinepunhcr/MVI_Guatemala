@@ -6,6 +6,9 @@
 \usage{
 f_highlight_DT(Xd, Xh, table_caption = NULL, highlight_colour = "#ffc266")
 }
+\value{
+A DT object
+}
 \description{
 Generic function for creating an interactive table with input df `Xd`, and
 with cells highlighted by an equivalently sized logical df `Xh`.

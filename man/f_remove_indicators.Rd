@@ -7,10 +7,9 @@
 f_remove_indicators(coin, remove_indicators = NULL)
 }
 \arguments{
-\item{coin}{COIN object, or list with first entry is the indicator metadata, 
-second entry is the aggregation metadata}
+\item{coin}{A coin.}
 
-\item{remove_indicators}{}
+\item{remove_indicators}{Character vector of indicator codes to remove.}
 }
 \value{
 coin COIN object
@@ -22,15 +21,17 @@ codes in `remove_indicators`. After removal, any results are regenerated
 }
 \details{
 The original data is always preserved so indicators can be restored.
-Analysis tables are not currently re-run so this has to be done separately.
+Analysis tables are not currently re-run so this would have to be done separately.
+However, there is actually no need to re-run.
 }
 \examples{
 MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
                                             package = "BuildIndex") )
 
-## when using create a data-raw folder and put you data input xlsx file there
-# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
-MVI2 <- f_analyse_indicators(MVI)
-MVI3 <- f_remove_indicators(MVI2, c("S.G.3", "A.M.1"))
-MVI3
+# call print method
+MVI
+
+MVI <- f_remove_indicators(MVI, c("S.G.3", "A.M.1"))
+# compare with previous
+MVI
 }

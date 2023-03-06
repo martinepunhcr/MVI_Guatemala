@@ -2,7 +2,7 @@
 
 #' Codes of any groups with only one child
 #' 
-#' To avoid errors in bod.
+#' To avoid errors in Compind functions
 #' 
 #' @param coin The coin
 #' 

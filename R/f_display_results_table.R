@@ -3,24 +3,22 @@
 #' Display results table
 #' 
 #' Outputs an interactive results table suitable for HTML documents and the app.
-#' .
-#' @param coin COIN object, or list with first entry is the indicator metadata, 
-#'              second entry is the aggregation metadata
+#' Can be further formatted (e.g. conditional formatting) to preference in the 
+#' app stage. This is just a demo.
 #' 
-#' @param type set type = "scores" or "ranks"
+#' @param coin The coin.
+#' @param type set One of `"scores"` or `"ranks"`.
+#' 
 #' @importFrom rlang abort
-#' @return a visualised data table
+#' @return An interactive table using DT.
 #' 
 #' @export
 #' @examples
 #' MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
 #'                                             package = "BuildIndex") )
 #' 
-#' ## when using create a data-raw folder and put you data input xlsx file there
-#' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
-#' 
-#' MVI2 <- f_build_index(coin = MVI)
-#' f_display_results_table(coin = MVI2)
+#' MVI <- f_build_index(MVI)
+#' f_display_results_table(MVI)
 f_display_results_table <- function(coin, type = "scores"){
 
   if(type == "scores"){

@@ -7,25 +7,32 @@
 f_plot_map(coin, dset = "Aggregated", iCode = "MVI", shp_path)
 }
 \arguments{
-\item{coin}{COIN object, or list with first entry is the indicator metadata, 
-second entry is the aggregation metadata}
+\item{coin}{The coin}
 
-\item{shp_path}{is currently at "shp/gtm_admbnda_adm2_ocha_conred_20190207.shp"}
+\item{dset}{Name of data set in the coin from which to extract the indicator/aggregate to plot}
+
+\item{iCode}{Code of indicator within `dset` to plot}
+
+\item{shp_path}{Guatemala example is currently at `"./inst/shp/gtm_admbnda_adm2_ocha_conred_20190207.shp"`}
+}
+\value{
+a leaflet object
 }
 \description{
 Plots an interactive choropleth map of the index or any indicator, using 
-supplied shape files.
+supplied shape files. This is powered by the leaflet package.
+}
+\details{
+Note we will need some checks here to make sure the shape file is compatible with the
+data. This can be dealt with in the app phase.
 }
 \examples{
 MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
                                             package = "BuildIndex") )
 
-## when using create a data-raw folder and put you data input xlsx file there
-# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+MVI <- f_build_index(MVI)
 
-MVI2 <- f_build_index(coin = MVI)
-
-f_plot_map(coin = MVI2, 
+f_plot_map(coin = MVI, 
            dset = "Aggregated",
            iCode = "MVI", 
            shp_path = system.file("shp/gtm_admbnda_adm2_ocha_conred_20190207.shp",

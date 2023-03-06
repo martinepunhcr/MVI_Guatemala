@@ -2,26 +2,35 @@
 
 #' Data input
 #' 
-#' Outputs a constructed coin
-#' Reads an Excel file found at `file_path` which is expected to be in a specific
-#' format. See "inst/data_input/data_module-input.xlsx" for example.
-#' .
+#' Reads a formatted Excel file found at `file_path` and outputs a constructed coin.
+#' 
+#' On reading the Excel file, this function does the following:
+#' 
+#' - Data is split into data and metadata and tidied
+#' - Metadata is merged with hard-coded index structure
+#' - Any indicators with no data at all are removed
+#' - Any resulting aggregation groups with no "children" are removed
+#' - A coin is assembled using COINr and this is the function output
+#' 
+#' If indicators/groups are removed, a message is sent to the console.
+#' 
+#' The Excel file is required to be in a fairly strict format: an example is given at
+#' `inst/data_input/data_module-input.xlsx`. This template is still a work in progress
+#' and can be modified in the app phase following further feedback. See also comments
+#' in the main vignette.
 #' 
 #' @param file_path path to the excel file where we have the raw data - organised
-#'      with the format exepected by COINR package
+#'      with the format expected by COINr package
 #'      
 #' @importFrom readxl read_excel  cell_limits 
 #' @importFrom COINr new_coin   
 #' 
-#' @return coin object with a COINR class
+#' @return coin-class object
 #' 
 #' @export
 #' @examples
 #' MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
 #'                                             package = "BuildIndex") )
-#' 
-#' ## when using create a data-raw folder and put you data input xlsx file there
-#' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
 #' 
 f_data_input <- function(file_path){
   
@@ -52,6 +61,8 @@ f_data_input <- function(file_path){
   
   
   ## @will Maybe need to do some format checking
+  ## Will: I agree, but this can only be done properly once the input template is finalised, so
+  ## I think this has to be left for the app phase.
 
   # Tidy iData ----
 
@@ -75,6 +86,7 @@ f_data_input <- function(file_path){
   # merge with aggregate levels
   
   ## @will - why not simply pulling this from the same excel ??
+  ## Will: we don't want to give that flexibility/complexity to the user.
   
 #  iMeta_aggs <- readRDS(here::here("inst/data_input", "iMeta_aggs.RDS"))
  iMeta_aggs <- readRDS(system.file("data_input/iMeta_aggs.RDS", package = "BuildIndex") ) 

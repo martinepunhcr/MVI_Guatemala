@@ -2,25 +2,18 @@
 
 #' Generate results
 #' 
-#' Generates sorted results tables and attaches back to the coin
+#' Generates sorted results tables and attaches back to the coin. This is a helper
+#' function which is called by [f_build_index()].
 #' 
-#' @param coin COIN object, or list with first entry is the indicator metadata, 
-#'              second entry is the aggregation metadata
+#' @param coin The coin
 #'              
 #' @importFrom COINr is.coin get_results
-#' @return coin COIN object
+#' 
+#' @return Updated coin.
 #' 
 #' @export
 #' @examples
-#' MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
-#'                                             package = "BuildIndex") )
-#' 
-#' ## when using create a data-raw folder and put you data input xlsx file there
-#' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
-#' 
-#' MVI2 <- f_build_index(coin = MVI)
-#' 
-#' f_generate_results(coin = MVI2)
+#' #
 f_generate_results <- function(coin){
 
   stopifnot(COINr::is.coin(coin),

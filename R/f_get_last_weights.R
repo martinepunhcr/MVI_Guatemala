@@ -2,23 +2,17 @@
 
 #' Get last weights
 #' 
-#' Description
+#' Returns the data frame of weights last used to aggregate the coin. Helper
+#' called by [f_change_weights()].
 #' 
-#' @param coin COIN object, or list with first entry is the indicator metadata, 
-#'              second entry is the aggregation metadata
-#' @return w weight 
+#' @param coin The coin
+#' 
+#' @return Data frame of weights.
+#' 
 #' @importFrom rlang abort
 #' @export
 #' @examples
-#' MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
-#'                                             package = "BuildIndex") )
-#' 
-#' ## when using create a data-raw folder and put you data input xlsx file there
-#' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
-#' MVI2 <- f_analyse_indicators(MVI)
-#' MVI3 <- f_build_index(coin = MVI2)
-#' weight <- f_get_last_weights(MVI3)
-#' weight 
+#' #
 f_get_last_weights <- function(coin){
 
   if(is.null(coin$Log$Aggregate)){

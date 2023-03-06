@@ -3,18 +3,18 @@
 #' Export to excel
 #' 
 #' Simplified export to Excel with some formatting
-#' Note if we change the index structure this may need adjusting.
+#' Note if we change the index structure, the conditional formatting will need
+#' to be adjusted.
 #' 
 #' 
-#' @param coin COIN object, or list with first entry is the indicator metadata, 
-#'              second entry is the aggregation metadata
-#' @param fname file name
+#' @param coin The coin, with results present.
+#' @param fname file name to write the results to.
 #' 
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom openxlsx createWorkbook addWorksheet writeData writeDataTable
 #'               conditionalFormatting saveWorkbook
 #'               
-#' @return
+#' @return Writes an Excel spreadsheet.
 #' 
 #' @export
 #' @examples
@@ -23,10 +23,10 @@
 #' 
 #' ## when using create a data-raw folder and put you data input xlsx file there
 #' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
-#' MVI2 <- f_analyse_indicators(coin = MVI)
-#' MVI3 <- f_build_index(coin = MVI2)
+#' MVI <- f_analyse_indicators(MVI)
+#' MVI <- f_build_index(MVI)
 #' 
-#' f_export_to_excel(coin = MVI3, 
+#' f_export_to_excel(coin = MVI, 
 #'                   fname = here::here("inst", "index_export.xlsx"))
 f_export_to_excel <- function(coin, fname = "index_export.xlsx"){
 

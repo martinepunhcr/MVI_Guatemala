@@ -2,7 +2,8 @@
 
 #' Benefit of doubt aggregation
 #' 
-#' As used in compind package
+#' As used in compind package. This is a wrapper which also returns `x` if `x`
+#' only has one column (to avoid errors in Compind).
 #' 
 #' @param x A numeric vector
 #' 

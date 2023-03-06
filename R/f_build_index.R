@@ -2,28 +2,37 @@
 
 #' Build index
 #' 
-#' this function builds the MVI. Assumes that at this point you have imported
-#' your data and built the MVI coin. Also optionally you have analysed and
+#' This function builds the index. It assumes that at this point you have imported
+#' your data and built the coin. Also optionally you have analysed and
 #' possibly removed indicators, but taken no further steps.
 #' 
-#' @param coin COIN object, or list with first entry is the indicator metadata, 
-#'              second entry is the aggregation metadata
+#' The operations performed here are:
+#' 
+#' - Treatment of outliers using a standard Winsorisation/log approach
+#' - Normalistion to the 1, 100 interval
+#' - Aggregation using one of the methods specified by `agg_method`
+#' 
+#' The output is an updated coin.
+#' 
+#' NOTE that for the Compind-powered aggregation methods, we need to be careful
+#' about how the aggregated values are rescaled or not in the case of a single
+#' indicator in an aggregation group. I initially blocked single-indicator groups
+#' here but relaxed this after adjusting the aggregation wrapper functions.
+#' 
+#' @param coin The coin.
 #' @param agg_method One of `"a_amean"` (arithmetic mean), `"a_gmean"` (geometric mean),
 #' `"a_bod"` (benefit of doubt via Compind package) or `"a_wroclaw"` (Wroclaw Taxonomic Method via Compind).
 #'              
 #' @importFrom COINr is.coin qTreat Normalise Aggregate
 #' 
-#' @return coin COIN object
+#' @return coin Updated coin.
 #' 
 #' @export
 #' @examples
 #' MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
 #'                                             package = "BuildIndex") )
 #' 
-#' ## when using create a data-raw folder and put you data input xlsx file there
-#' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
-#' 
-#' f_build_index(coin = MVI)
+#' MVI <- f_build_index(coin = MVI)
 f_build_index <- function(coin, agg_method = "a_amean"){
 
   stopifnot(COINr::is.coin(coin))

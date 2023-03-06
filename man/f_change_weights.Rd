@@ -7,8 +7,7 @@
 f_change_weights(coin, w)
 }
 \arguments{
-\item{coin}{COIN object, or list with first entry is the indicator metadata, 
-second entry is the aggregation metadata}
+\item{coin}{The coin.}
 
 \item{w}{weight. The weights `w` can either be a named list with names as iCodes
           and values the new weights, OR 
@@ -17,25 +16,27 @@ second entry is the aggregation metadata}
           In both cases a subset of weight-code pairs can be specified.
          E.g. `list("Salud" = 0.5, Amenazas = 0.8)`.
 
-         OR set w = "equal" for equal weights everywhere, or w = "original" to use the
+         OR set `w = "equal"` for equal weights everywhere, or `w = "original"` to use the
           weights that were input with the input data.
 
           Remember that weights are relative within aggregation groups.}
 }
 \value{
-coin COIN object
+Updated coin.
 }
 \description{
-Function that takes some new weights and regenerates the coin.
+Function that takes some new weights and regenerates the coin. Results are
+regenerated from the aggregation step only, so all previously-specified methodology
+is fixed.
 }
 \examples{
 MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
                                             package = "BuildIndex") )
 
-## when using create a data-raw folder and put you data input xlsx file there
-# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
-MVI2 <- f_analyse_indicators(coin = MVI)
-MVI3 <- f_build_index(coin = MVI2)
-MVI4 <- f_change_weights(coin = MVI3, w= list(Amenazas = 2, Cap_Resp = 0.5))
-MVI4
+MVI <- f_build_index(MVI)
+MVI2 <- f_change_weights(MVI, w= list(Amenazas = 1.5, Cap_Resp = 0.5))
+
+# we can use a COINr function for a comparison
+COINr::compare_coins(MVI, MVI2, dset = "Aggregated", iCode = "MVI") |>
+  head()
 }

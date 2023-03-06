@@ -2,28 +2,27 @@
 
 #' Display indicator analysis
 #' 
-#' Description
+#' Displays the analysis performed by [f_analyse_indicators()] in an interactive
+#' table using the DT package.
 #' 
-#' @param coin COIN object, or list with first entry is the indicator metadata, 
-#'              second entry is the aggregation metadata
+#' @param coin The coin.
 #'              
-#' @param  filter_to_flagged   TRUE or FALSE
+#' @param  filter_to_flagged Logical: if `TRUE` filters to only show indicators with
+#' at least one flag.
+#' 
 #' @importFrom COINr is.coin
 #' @importFrom rlang abort
 #' 
-#' @return
+#' @return An interactive table (DT object).
 #' 
 #' @export
 #' @examples
 #' MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
 #'                                             package = "BuildIndex") )
 #' 
-#' ## when using create a data-raw folder and put you data input xlsx file there
-#' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+#' MVI <- f_analyse_indicators(MVI)
 #' 
-#' MVI2 <- f_analyse_indicators(MVI)
-#' 
-#' f_display_indicator_analysis(MVI2)
+#' f_display_indicator_analysis(MVI)
 f_display_indicator_analysis <- function(coin, filter_to_flagged = TRUE){
 
   stopifnot(COINr::is.coin(coin))
