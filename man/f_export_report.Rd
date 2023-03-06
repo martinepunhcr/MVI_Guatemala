@@ -6,6 +6,9 @@
 \usage{
 f_export_report()
 }
+\value{
+nothing a report is created...
+}
 \description{
 Title
 }

@@ -6,7 +6,7 @@
 #' with cells highlighted by an equivalently sized logical df `Xh`.
 #' This is used for displaying the output of `f_analyse_indicators()`.
 #' 
-#' @return
+#' @return A DT object
 #' 
 #' @export
 #' @examples

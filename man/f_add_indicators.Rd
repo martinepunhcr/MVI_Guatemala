@@ -7,13 +7,12 @@
 f_add_indicators(coin, add_indicators = NULL)
 }
 \arguments{
-\item{coin}{COIN object, or list with first entry is the indicator metadata, 
-second entry is the aggregation metadata}
+\item{coin}{The coin}
 
-\item{add_indicators}{}
+\item{add_indicators}{Character vector of indicator codes to add back in.}
 }
 \value{
-coin COIN object
+coin Updated coin.
 }
 \description{
 As `f_remove_indicators()` but adds indicators back in. Obviously only
@@ -23,8 +22,12 @@ As `f_remove_indicators()` but adds indicators back in. Obviously only
 MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
                                             package = "BuildIndex") )
 
-## when using create a data-raw folder and put you data input xlsx file there
-# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+# remove first
+MVI <- f_remove_indicators(MVI, c("S.G.3", "A.M.1"))
+# print method
+MVI
 
-f_add_indicators(MVI)
+# add one back
+MVI <- f_add_indicators(MVI, "S.G.3")
+MVI
 }

@@ -8,22 +8,32 @@ f_data_input(file_path)
 }
 \arguments{
 \item{file_path}{path to the excel file where we have the raw data - organised
-with the format exepected by COINR package}
+with the format expected by COINr package}
 }
 \value{
-coin object with a COINR class
+coin-class object
 }
 \description{
-Outputs a constructed coin
-Reads an Excel file found at `file_path` which is expected to be in a specific
-format. See "inst/data_input/data_module-input.xlsx" for example.
-.
+Reads a formatted Excel file found at `file_path` and outputs a constructed coin.
+}
+\details{
+On reading the Excel file, this function does the following:
+
+- Data is split into data and metadata and tidied
+- Metadata is merged with hard-coded index structure
+- Any indicators with no data at all are removed
+- Any resulting aggregation groups with no "children" are removed
+- A coin is assembled using COINr and this is the function output
+
+If indicators/groups are removed, a message is sent to the console.
+
+The Excel file is required to be in a fairly strict format: an example is given at
+`inst/data_input/data_module-input.xlsx`. This template is still a work in progress
+and can be modified in the app phase following further feedback. See also comments
+in the main vignette.
 }
 \examples{
 MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
                                             package = "BuildIndex") )
-
-## when using create a data-raw folder and put you data input xlsx file there
-# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
 
 }

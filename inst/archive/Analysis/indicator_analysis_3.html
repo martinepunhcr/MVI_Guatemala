@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-0.9.503">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="William Becker">
+
+<title>Initial Indicator Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="indicator_analysis_3_files/libs/clipboard/clipboard.min.js"></script>
+<script src="indicator_analysis_3_files/libs/quarto-html/quarto.js"></script>
+<script src="indicator_analysis_3_files/libs/quarto-html/popper.min.js"></script>
+<script src="indicator_analysis_3_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="indicator_analysis_3_files/libs/quarto-html/anchor.min.js"></script>
+<link href="indicator_analysis_3_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="indicator_analysis_3_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="indicator_analysis_3_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="indicator_analysis_3_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="indicator_analysis_3_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet">
+
+<script src="indicator_analysis_3_files/libs/htmlwidgets-1.6.1/htmlwidgets.js"></script>
+<link href="indicator_analysis_3_files/libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+<script src="indicator_analysis_3_files/libs/datatables-binding-0.27/datatables.js"></script>
+<script src="indicator_analysis_3_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="indicator_analysis_3_files/libs/dt-core-1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="indicator_analysis_3_files/libs/dt-core-1.12.1/css/jquery.dataTables.extra.css" rel="stylesheet">
+<script src="indicator_analysis_3_files/libs/dt-core-1.12.1/js/jquery.dataTables.min.js"></script>
+<link href="indicator_analysis_3_files/libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet">
+<script src="indicator_analysis_3_files/libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#intro" id="toc-intro" class="nav-link active" data-scroll-target="#intro">Intro</a></li>
+  <li><a href="#data-import" id="toc-data-import" class="nav-link" data-scroll-target="#data-import">Data import</a></li>
+  <li><a href="#analysis" id="toc-analysis" class="nav-link" data-scroll-target="#analysis">Analysis</a>
+  <ul class="collapse">
+  <li><a href="#data-availability" id="toc-data-availability" class="nav-link" data-scroll-target="#data-availability">Data availability</a></li>
+  <li><a href="#zeros-and-duplicates" id="toc-zeros-and-duplicates" class="nav-link" data-scroll-target="#zeros-and-duplicates">Zeros and duplicates</a></li>
+  <li><a href="#outliers" id="toc-outliers" class="nav-link" data-scroll-target="#outliers">Outliers</a></li>
+  <li><a href="#correlations" id="toc-correlations" class="nav-link" data-scroll-target="#correlations">Correlations</a></li>
+  </ul></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a>
+  <ul class="collapse">
+  <li><a href="#summary-table" id="toc-summary-table" class="nav-link" data-scroll-target="#summary-table">Summary table</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Initial Indicator Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>William Becker </p>
+          </div>
+  </div>
+    
+    
+  </div>
+  
+
+</header>
+
+<section id="intro" class="level2">
+<h2 class="anchored" data-anchor-id="intro">Intro</h2>
+<p>This is a short document to record the initial indicator analysis of the Municipal Vulnerability Index (MVI) for Guatemala.</p>
+<p>The objectives here are:</p>
+<ol type="1">
+<li>Univariate analysis based on data availability, uniqueness, distribution properties.</li>
+<li>Multivariate analysis based on correlations.</li>
+</ol>
+<p>We recall that the end objective here is to eventually arrive at a “module” which can be used for selecting indicators based on statistical characteristics. Therefore we need some basic criteria to do that by.</p>
+<p>Typical criteria for indicator selection and treatment can be as follows:</p>
+<ul>
+<li>Percentage missing data (indicators below a set percentage are flagged - this is often set at e.g.&nbsp;66%)</li>
+<li>Percentage zeroes (indicators above a set percentage are flagged - this could be e.g.&nbsp;50%)</li>
+<li>Percentage unique values (again, we can set a threshold here)</li>
+<li>Presence of outliers, flagged by having both |skew| &gt; 2 and kurtosis &gt; 3.5</li>
+<li>Collinearity with other indicators in the same aggregation group</li>
+<li>Strong negative correlation with other indicators in the same group</li>
+</ul>
+<p>The idea here would be to simply flag these things to the user, who then has the option to either remove or retain the indicators.</p>
+</section>
+<section id="data-import" class="level2">
+<h2 class="anchored" data-anchor-id="data-import">Data import</h2>
+<p>In a previous version, I began cleaning and formatting the data directly in R. However, since the end objective is to arrive at data modules that can deal with data from other countries, we need to consider a generic input format and it makes sense to do this early on.</p>
+<p>So for now I have an intermediate solution, which is to format the data in Excel for COINr. I have also sketched out a possible generic format based on one sheet. However this latter will need the structure of the index hard-coded in the end product, so I’m going to begin by importing the familiar <code>iData</code> and <code>iMeta</code> data frames.</p>
+<p>What I did in Excel:</p>
+<ul>
+<li>Extracted the indicator data, keeping only column headers (codes) and renaming the municipal code to <code>uCode</code> and the Municipio to <code>uName</code>.</li>
+<li>Created short codes for aggregate levels</li>
+<li>Created an <code>imeta</code> table based on the indicator metadata table from the master sheet. This renames columns, converts some things to COINr-compatible (e.g.&nbsp;directions), and also adds the rows for the aggregate levels which effectively defines the structure of the index.</li>
+<li>I noticed one probable typo/mistake and corrected. In the indicator data the code for “Tasa de Pobreza” is “S.E.3” whereas in the metadata it is specified as “S.E.4”. I altered the latter to “S.E.3” as I presume this is what it should be.</li>
+</ul>
+<p>A suggestion here would be that for any new indicators that become available, we could directly add them to the <code>iData</code> table. We could potentially have an Excel sheet with reads the master indicator table and formats it for import to R.</p>
+<p>We begin by importing the data set as it stands (the version at the time of writing is 30/01/2023).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># note: if indicators are added the ranges here will need to be adjusted</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>idata <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data_input"</span>,<span class="st">"data_input_formatted.xlsx"</span>), <span class="at">sheet =</span> <span class="st">"iData"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>imeta <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data_input"</span>,<span class="st">"data_input_formatted.xlsx"</span>), <span class="at">sheet =</span> <span class="st">"iMeta"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>idata</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 340 × 58
+   Cód_dep Departamento admin…¹ uName A.A.1 A.D.1 A.M.1 A.M.2  A.M.4 A.M.5 A.M.6
+     &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;   &lt;chr&gt; &lt;lgl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;lgl&gt; &lt;lgl&gt;
+ 1       1 Guatemala    GT0101  Guat… NA      9.1 66.5  148.  9.23e1 NA    NA   
+ 2       1 Guatemala    GT0102  Sant… NA      7.8 70.7   18.4 9.20e2 NA    NA   
+ 3       1 Guatemala    GT0103  San … NA      4.2 50.1   69.7 8.72e2 NA    NA   
+ 4       1 Guatemala    GT0104  San … NA      2.5  0    166.  3.63e4 NA    NA   
+ 5       1 Guatemala    GT0105  Pale… NA      7   14.1  164.  1.92e3 NA    NA   
+ 6       1 Guatemala    GT0106  Chin… NA      7.2 11.3   34.9 7.24e2 NA    NA   
+ 7       1 Guatemala    GT0107  San … NA      7.4  8.53  49.3 1.56e3 NA    NA   
+ 8       1 Guatemala    GT0108  Mixco NA      9.2 24.5   37.5 1.85e2 NA    NA   
+ 9       1 Guatemala    GT0109  San … NA      4.2  3.90  34.1 1.13e3 NA    NA   
+10       1 Guatemala    GT0110  San … NA      2.6  8.71  59.7 3.24e2 NA    NA   
+# … with 330 more rows, 47 more variables: A.V.1 &lt;dbl&gt;, A.V.2 &lt;dbl&gt;,
+#   A.V.3 &lt;dbl&gt;, A.V.5 &lt;lgl&gt;, S.A.1 &lt;dbl&gt;, S.A.3 &lt;dbl&gt;, S.A.4 &lt;dbl&gt;,
+#   S.E.1 &lt;dbl&gt;, S.E.2 &lt;dbl&gt;, S.E.3 &lt;dbl&gt;, S.G.1 &lt;dbl&gt;, S.G.2 &lt;dbl&gt;,
+#   S.G.3 &lt;dbl&gt;, S.G.4 &lt;dbl&gt;, S.G.5 &lt;dbl&gt;, S.G.6 &lt;dbl&gt;, S.G.7 &lt;dbl&gt;,
+#   S.G.8 &lt;dbl&gt;, S.T.1 &lt;dbl&gt;, S.T.2 &lt;dbl&gt;, S.T.3 &lt;lgl&gt;, S.T.4 &lt;dbl&gt;,
+#   C.C.1 &lt;dbl&gt;, C.C.2 &lt;lgl&gt;, C.C.3 &lt;lgl&gt;, C.C.4 &lt;lgl&gt;, C.E.4 &lt;dbl&gt;,
+#   C.E.5 &lt;dbl&gt;, C.E.6 &lt;dbl&gt;, C.E.8 &lt;dbl&gt;, C.E.9 &lt;dbl&gt;, C.E.10 &lt;dbl&gt;, …</code></pre>
+</div>
+</div>
+<p>The data includes columns of indicator data, but also municipal code, name of municipality, and department code and name. Now also the main ID for each row is the “admin2Pcode” which are standardised second-level subnational codes used by UNHCR. We just have to rename this column to be called <code>uCode</code> so it is recognised by COINr.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(idata)[<span class="fu">names</span>(idata) <span class="sc">==</span><span class="st">"admin2Pcode"</span>] <span class="ot">&lt;-</span> <span class="st">"uCode"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>It is also evident that some indicators here are placeholders and have no available data yet. We have to remove these first.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># which indicators have no data?</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>i_nodata <span class="ot">&lt;-</span> <span class="fu">names</span>(idata)[<span class="fu">colSums</span>(<span class="sc">!</span><span class="fu">is.na</span>(idata)) <span class="sc">==</span> <span class="dv">0</span>]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>i_nodata</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "A.A.1" "A.M.5" "A.M.6" "A.V.5" "S.T.3" "C.C.2" "C.C.3" "C.C.4" "C.J.1"
+[10] "C.J.3" "C.S.1" "C.S.2" "C.S.3"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>idata <span class="ot">&lt;-</span> idata[<span class="sc">!</span>(<span class="fu">names</span>(idata) <span class="sc">%in%</span> i_nodata)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>With this, the <code>idata</code> data frame is in the correct format. As for the metadata <code>imeta</code>, this has already been formatted in Excel. The only thing to note here is that I have removed some metadata columns which are not necessary for COINr. If needed, we could pass through other columns in the future.</p>
+<p>The last thing to do is to check consistency between <code>imeta</code> and <code>idata</code>. Since we removed columns from <code>idata</code> we also have to remove these from <code>imeta</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>imeta <span class="ot">&lt;-</span> imeta[<span class="sc">!</span>(imeta<span class="sc">$</span>iCode <span class="sc">%in%</span> i_nodata), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Check whether all <code>imeta</code> codes are in <code>idata</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># exclude aggregate rows</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>imeta_i <span class="ot">&lt;-</span> imeta[imeta<span class="sc">$</span>Type <span class="sc">!=</span> <span class="st">"Aggregate"</span>, ]</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># any codes missing?</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>missing_idata <span class="ot">&lt;-</span> imeta_i<span class="sc">$</span>iCode[<span class="sc">!</span>(imeta_i<span class="sc">$</span>iCode <span class="sc">%in%</span> <span class="fu">names</span>(idata))]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>missing_idata</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>character(0)</code></pre>
+</div>
+</div>
+<p>This is fine. Now do the reverse check:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>icodes_idata <span class="ot">&lt;-</span> <span class="fu">names</span>(idata)[<span class="sc">!</span>(<span class="fu">names</span>(idata) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"uCode"</span>, <span class="st">"uName"</span>))]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>icodes_idata[<span class="sc">!</span>(icodes_idata <span class="sc">%in%</span> imeta<span class="sc">$</span>iCode)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>character(0)</code></pre>
+</div>
+</div>
+<p>OK so everything looks consistent. There is one last thing I found which causes a problem. One of the categories “Acc_Hum” doesn’t have any indicators underneath it with any data so we need to remove it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>imeta <span class="ot">&lt;-</span> imeta[<span class="sc">!</span>(imeta<span class="sc">$</span>iCode <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Acc_Hum"</span>)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This means that now we can go ahead and enter the data into COINr, and assemble a “coin”. We will also clean up the environment.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(COINr)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>MVI <span class="ot">&lt;-</span> <span class="fu">new_coin</span>(<span class="at">iData =</span> idata, <span class="at">iMeta =</span> imeta, <span class="at">level_names =</span> <span class="fu">c</span>(<span class="st">"Indicator"</span>, <span class="st">"Category"</span>, <span class="st">"Dimension"</span>, <span class="st">"Index"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>iData checked and OK.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>iMeta checked and OK.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Written data set to .$Data$Raw</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># clean all except coin</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">setdiff</span>(<span class="fu">ls</span>(), <span class="st">"MVI"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="analysis" class="level2">
+<h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
+<p>With the data in COINr we can begin the analysis. The first thing is to look at the structure of the index:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_framework</span>(MVI, <span class="at">type =</span> <span class="st">"stack"</span>, <span class="at">text_size =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="indicator_analysis_3_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="1152"></p>
+</div>
+</div>
+<p>Let us also check the contents of the coin:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>MVI</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>--------------
+A coin with...
+--------------
+Input:
+  Units: 340 (GT0101, GT0102, GT0103, ...)
+  Indicators: 41 (S.A.1, S.A.3, S.A.4, ...)
+  Denominators: 0 ()
+  Groups: 2 (Departamento, Cód_dep)
+
+Structure:
+  Level 1 Indicator: 41 indicators (A.D.1, A.V.1, A.V.2, ...) 
+  Level 2 Category: 12 groups (Desastres, Violencia, Comunitaria, ...) 
+  Level 3 Dimension: 4 groups (Amenazas, Cap_Resp, Mov_Hum, ...) 
+  Level 4 Index: 1 groups (MVI) 
+
+Data sets:
+  Raw (340 units)</code></pre>
+</div>
+</div>
+<p>In previous versions of this analysis, we experimented with denominating indicators inside COINr. After some reflection we decided instead to do denomination before the data enters R, so at this point all indicators are denominated. This means that the analysis can be performed directly on the raw data.</p>
+<p>We can quickly generate a table of indicator statistics in COINr using the <code>get_stats()</code> function, and this will help us with several of the analysis tasks.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>df_stats <span class="ot">&lt;-</span> <span class="fu">get_stats</span>(MVI, <span class="at">dset =</span> <span class="st">"Raw"</span>,</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">t_skew =</span> <span class="dv">2</span>, <span class="at">t_kurt =</span> <span class="fl">3.5</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">t_avail =</span> <span class="fl">0.66</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">t_zero =</span> <span class="fl">0.66</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">t_unq =</span> <span class="fl">0.5</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">out2 =</span> <span class="st">"df"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="data-availability" class="level3">
+<h3 class="anchored" data-anchor-id="data-availability">Data availability</h3>
+<p>Let’s begin with data availability. Let’s assume a rule “data availability should be greater than or equal to 66%”. Under this criterion let’s see which indicators are flagged:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>df_stats[df_stats<span class="sc">$</span>Flag.Avail <span class="sc">==</span> <span class="st">"LOW"</span>, <span class="fu">c</span>(<span class="st">"iCode"</span>, <span class="st">"N.Avail"</span>, <span class="st">"Frc.Avail"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] iCode     N.Avail   Frc.Avail
+&lt;0 rows&gt; (or 0-length row.names)</code></pre>
+</div>
+</div>
+<p>This shows that no indicators are flagged. In a previous version of this analysis one indicator did have low data and this has since been removed, so now all indicators have a good data availability. We can in fact check the lowest data availability indicators:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>df_stats <span class="sc">|&gt;</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(iCode, N.Avail, Frc.Avail) <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Frc.Avail) <span class="sc">|&gt;</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">row.names =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<thead>
+<tr class="header">
+<th style="text-align: left;">iCode</th>
+<th style="text-align: right;">N.Avail</th>
+<th style="text-align: right;">Frc.Avail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">C.E.11</td>
+<td style="text-align: right;">262</td>
+<td style="text-align: right;">0.771</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">A.V.2</td>
+<td style="text-align: right;">339</td>
+<td style="text-align: right;">0.997</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">A.D.1</td>
+<td style="text-align: right;">340</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">A.M.1</td>
+<td style="text-align: right;">340</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">A.M.2</td>
+<td style="text-align: right;">340</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>This shows that the data availability is in general very high.</p>
+</section>
+<section id="zeros-and-duplicates" class="level3">
+<h3 class="anchored" data-anchor-id="zeros-and-duplicates">Zeros and duplicates</h3>
+<p>Zeros are not a problem per se, but quite often we find indicators with a very large proportion of zeros and just a handful of non-zero values. Or more generally we find that a large proportion of indicator values share the same value. This means that the power of the indicator to differentiate between units/regions is quite low. We can check this using the stats table.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>df_stats[(df_stats<span class="sc">$</span>Frc.NonZero <span class="sc">&lt;</span> <span class="fl">0.5</span>) <span class="sc">|</span> (df_stats<span class="sc">$</span>Frc.Same <span class="sc">&gt;</span> <span class="fl">0.5</span>), <span class="fu">c</span>(<span class="st">"iCode"</span>, <span class="st">"Frc.NonZero"</span>, <span class="st">"Frc.Same"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   iCode Frc.NonZero Frc.Same
+2  A.M.1        0.25    0.750
+40 C.J.2        1.00    0.697</code></pre>
+</div>
+</div>
+<p>Here the indicators “A.M.1” (“# de personas refugiadas y solicitantes de asilo”) and “C.J.2” (“Tasa de establecimientos de justicia por 100.000 habitantes) are flagged. This is because respectively 75% and 70% of the indicator values are duplicates:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_dist</span>(MVI, <span class="at">dset =</span> <span class="st">"Raw"</span>, <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"A.M.1"</span>, <span class="st">"C.J.2"</span>), <span class="at">type =</span> <span class="st">"Dot"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="indicator_analysis_3_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>These indicators have a low power to differentiate between municipalities, which makes them less useful but can still be retained if important to the framework.</p>
+</section>
+<section id="outliers" class="level3">
+<h3 class="anchored" data-anchor-id="outliers">Outliers</h3>
+<p>In composite indicator construction, a rule of thumb to identify distributions with outliers is any distributions that have absolute skew greater than 2 and kurtosis greater than 3.5. This is very much subjective but gives a rough idea and usually helps flag distributions that warrant a closer look. As for why we should be concerned about outliers at all, see my opinions <a href="https://bluefoxr.github.io/COINrDoc/data-treatment.html#why-treat-data">here</a>.</p>
+<p>In any case let’s see which indicators are flagged on this basis:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>df_outliers <span class="ot">&lt;-</span> df_stats[df_stats<span class="sc">$</span>Flag.SkewKurt <span class="sc">==</span> <span class="st">"OUT"</span>, <span class="fu">c</span>(<span class="st">"iCode"</span>, <span class="st">"Skew"</span>, <span class="st">"Kurt"</span>)]</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(df_outliers, <span class="at">row.names =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<thead>
+<tr class="header">
+<th style="text-align: left;">iCode</th>
+<th style="text-align: right;">Skew</th>
+<th style="text-align: right;">Kurt</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A.M.1</td>
+<td style="text-align: right;">5.04</td>
+<td style="text-align: right;">27.90</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">A.M.2</td>
+<td style="text-align: right;">2.14</td>
+<td style="text-align: right;">5.82</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">A.M.4</td>
+<td style="text-align: right;">4.10</td>
+<td style="text-align: right;">24.30</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S.A.4</td>
+<td style="text-align: right;">9.12</td>
+<td style="text-align: right;">101.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S.E.2</td>
+<td style="text-align: right;">2.39</td>
+<td style="text-align: right;">8.28</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S.G.4</td>
+<td style="text-align: right;">3.71</td>
+<td style="text-align: right;">18.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S.G.5</td>
+<td style="text-align: right;">8.70</td>
+<td style="text-align: right;">108.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S.G.6</td>
+<td style="text-align: right;">6.25</td>
+<td style="text-align: right;">46.50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S.G.7</td>
+<td style="text-align: right;">10.50</td>
+<td style="text-align: right;">142.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C.E.4</td>
+<td style="text-align: right;">9.10</td>
+<td style="text-align: right;">95.10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.E.6</td>
+<td style="text-align: right;">2.59</td>
+<td style="text-align: right;">7.90</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C.E.9</td>
+<td style="text-align: right;">4.82</td>
+<td style="text-align: right;">39.80</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.E.11</td>
+<td style="text-align: right;">2.45</td>
+<td style="text-align: right;">8.26</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C.I.5</td>
+<td style="text-align: right;">5.23</td>
+<td style="text-align: right;">44.50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.I.6</td>
+<td style="text-align: right;">-2.20</td>
+<td style="text-align: right;">5.17</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C.J.2</td>
+<td style="text-align: right;">16.70</td>
+<td style="text-align: right;">294.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C.S.4</td>
+<td style="text-align: right;">5.05</td>
+<td style="text-align: right;">32.40</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>There are a total of 17 indicators flagged. This deserves a closer look. I’ll plot in groups of six</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_dist</span>(MVI, <span class="at">dset =</span> <span class="st">"Raw"</span>, <span class="at">iCodes =</span> df_outliers<span class="sc">$</span>iCode[<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="indicator_analysis_3_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_dist</span>(MVI, <span class="at">dset =</span> <span class="st">"Raw"</span>, <span class="at">iCodes =</span> df_outliers<span class="sc">$</span>iCode[<span class="dv">7</span><span class="sc">:</span><span class="dv">12</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="indicator_analysis_3_files/figure-html/unnamed-chunk-17-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_dist</span>(MVI, <span class="at">dset =</span> <span class="st">"Raw"</span>, <span class="at">iCodes =</span> df_outliers<span class="sc">$</span>iCode[<span class="dv">13</span><span class="sc">:</span><span class="dv">17</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="indicator_analysis_3_files/figure-html/unnamed-chunk-17-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The plots here are all fairly similar and reflect log-normal distributions. We already know that most indicators have a reasonable proportion of unique values, so the high skew/kurtosis values are not caused by duplications. These are typical distributions that are associated with socioeconomic variables such as GDP, wealth, and so on (heavily skewed).</p>
+<p>These indicators are not problematic but may need a data transformation, depending on the objectives of the index (to be discussed). The default here would be to apply a log transformation to each indicator before aggregation, which would make the distributions roughly normal.</p>
+</section>
+<section id="correlations" class="level3">
+<h3 class="anchored" data-anchor-id="correlations">Correlations</h3>
+<p>Here we look at the associations between indicators, using correlations. Although correlations are a linear measure of dependence and relationships could be nonlinear, linear dependence still does a good job of flagging strong associations which we can later check more closely if required.</p>
+<p>Let us begin with a general plot of all correlations between indicators to get an idea for the correlation structure. We exclude correlations between indicators that are not in the same dimension, and we draw boxes around each categoria. We also account for the <em>directions</em> of indicators, i.e.&nbsp;indicators with negative directionality have their directions reversed before calculating correlations.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_corr</span>(MVI, <span class="at">dset =</span> <span class="st">"Raw"</span>, <span class="at">showvals =</span> <span class="cn">FALSE</span>, <span class="at">box_level =</span> <span class="dv">2</span>,</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">grouplev =</span> <span class="dv">3</span>, <span class="at">flagcolours =</span> <span class="cn">TRUE</span>, <span class="at">cortype =</span> <span class="st">"spearman"</span>, <span class="at">pval =</span> <span class="dv">0</span>, <span class="at">use_directions =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="indicator_analysis_3_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>This shows that in the most correlations except within the “Situación socioeconómica” dimension can be considered “OK” (correlation 0.3-0.9) or “weak” (correlation between -0.4 and 0.3). Obviously these thresholds are rough. In any case the main things to look out for are strongly negative correlations (which almost cancel out in aggregation) or collinearities (which can imply double counting). COINr has a dedicated function for picking these up:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># any correlations above 0.9 within the same categoria</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>neg_corrs <span class="ot">&lt;-</span> <span class="fu">get_corr_flags</span>(MVI, <span class="at">dset =</span> <span class="st">"Raw"</span>, <span class="at">cor_thresh =</span> <span class="fl">0.9</span>, <span class="at">thresh_type =</span> <span class="st">"high"</span>,</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">grouplev =</span> <span class="dv">2</span>, <span class="at">cortype =</span> <span class="st">"spearman"</span>, <span class="at">use_directions =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">nrow</span>(neg_corrs) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(neg_corrs, <span class="at">row.names =</span> F)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here there are no collinear indicators within the first level of aggregation (categorias).</p>
+<p>We can do the same for negative correlations:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># any negative correlations below -0.4 within the same categoria</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">get_corr_flags</span>(MVI, <span class="at">dset =</span> <span class="st">"Raw"</span>, <span class="at">cor_thresh =</span> <span class="sc">-</span><span class="fl">0.4</span>, <span class="at">thresh_type =</span> <span class="st">"low"</span>,</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">grouplev =</span> <span class="dv">2</span>, <span class="at">cortype =</span> <span class="st">"spearman"</span>, <span class="at">use_directions =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">row.names =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Group</th>
+<th style="text-align: left;">Ind1</th>
+<th style="text-align: left;">Ind2</th>
+<th style="text-align: right;">Corr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Alim_Vivi</td>
+<td style="text-align: left;">S.A.3</td>
+<td style="text-align: left;">S.A.4</td>
+<td style="text-align: right;">-0.412</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Grup_Vul</td>
+<td style="text-align: left;">S.G.2</td>
+<td style="text-align: left;">S.G.4</td>
+<td style="text-align: right;">-0.460</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Grup_Vul</td>
+<td style="text-align: left;">S.G.3</td>
+<td style="text-align: left;">S.G.8</td>
+<td style="text-align: right;">-0.939</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Grup_Vul</td>
+<td style="text-align: left;">S.G.3</td>
+<td style="text-align: left;">S.G.4</td>
+<td style="text-align: right;">-0.550</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Grup_Vul</td>
+<td style="text-align: left;">S.G.3</td>
+<td style="text-align: left;">S.G.6</td>
+<td style="text-align: right;">-0.424</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Here we see one strong negative correlation in particular. We will visualise the two strongest correlation pairs:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="st">"Raw"</span>, <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"S.G.3"</span>, <span class="st">"S.G.4"</span>), <span class="at">log_scale =</span> <span class="fu">c</span>(F, T))</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">plot_scatter</span>(MVI, <span class="at">dsets =</span> <span class="st">"Raw"</span>, <span class="at">iCodes =</span> <span class="fu">c</span>(<span class="st">"S.G.3"</span>, <span class="st">"S.G.8"</span>))</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="indicator_analysis_3_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The negative correlation of S.G.3 against S.G.4 is only moderate and, although not ideal, does not give a strong case for removing any of these indicators unless there are additional reasons to do so. The plot of S.G.3 against S.G.8 is of particular interest: it seems that where there are a lot of Maya people there are very few ladino/mestizo people. I wonder however if this is an artifact of the way one of these indicators is calculated - perhaps one is calculated based on the other?</p>
+</section>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<p>This analysis has checked:</p>
+<ul>
+<li>Data availability</li>
+<li>Zeroes and duplicates</li>
+<li>Outliers</li>
+<li>Presence of collinearity and/or strong negative correlations within groups</li>
+</ul>
+<p>The objective being to see if indicators are <em>statistically</em> suitable for inclusion into the index. This makes no consideration of <em>conceptual</em> matters such as whether each indicator is relevant to the concept of vulnerability at the municipal level.</p>
+<p>At this point the analysis has been through several iterations and most issues have been addressed. Perhaps the only issue to still keep in mind is the strange relationship between S.G.3 and S.G.8.</p>
+<section id="summary-table" class="level3">
+<h3 class="anchored" data-anchor-id="summary-table">Summary table</h3>
+<p>Looking ahead to semi-automating the process that we went through above, we could consider a summary table which automatically generates the kind of “flags” in one shot that were brought up in the analysis. The table below is generated by the <code>get_indicator_flags()</code> function which summarises any indicators that have any of low data availability, a high number of “same” indicators, have outliers, and collinear or negative correlations within the same categoria.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R/old"</span>,<span class="st">"selection.R"</span>))</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R/old"</span>,<span class="st">"table_tests.R"</span>))</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>l_flags <span class="ot">&lt;-</span> <span class="fu">get_indicator_flags</span>(MVI, <span class="st">"Raw"</span>)</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="co"># adjust for table</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>l_flags<span class="sc">$</span>df_flag<span class="sc">$</span>iCode <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="fu">highlight_DT</span>(l_flags<span class="sc">$</span>df_disp, l_flags<span class="sc">$</span>df_flag)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-d8eae26e3efc1461cdd9" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-d8eae26e3efc1461cdd9">{"x":{"filter":"none","vertical":false,"data":[["A.M.1","A.M.2","A.M.4","S.A.3","S.A.4","S.E.2","S.G.2","S.G.3","S.G.4","S.G.5","S.G.6","S.G.7","S.G.8","C.E.4","C.E.6","C.E.9","C.E.11","C.I.5","C.I.6","C.J.2","C.S.4"],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0.771,1,1,1,1],[0.75,0.00294,0.00294,0.0265,0.35,0.00294,0.0765,0.00294,0.0353,0.0382,0.218,0.00588,0.00294,0.00294,0.00294,0.00588,0.0191,0.00294,0.0265,0.697,0.00294],["5.04 / 27.9","2.14 / 5.82","4.1 / 24.3","0.746 / 0.0591","9.12 / 101","2.39 / 8.28","-0.625 / -0.824","0.206 / -1.76","3.71 / 18","8.7 / 108","6.25 / 46.5","10.5 / 142","-0.153 / -1.74","9.1 / 95.1","2.59 / 7.9","4.82 / 39.8","2.45 / 8.26","5.23 / 44.5","-2.2 / 5.17","16.7 / 294","5.05 / 32.4"],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,"S.A.4","S.A.3",null,"S.G.4","S.G.4, S.G.6, S.G.8","S.G.2, S.G.3",null,"S.G.3",null,"S.G.3",null,null,null,null,null,null,null,null],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,1,1,0,1,1,0,0,1,1,1,1,0,1,1,1,1,1,1,1,1],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,1,1,0,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>iCode<\/th>\n      <th>Frc.Avail<\/th>\n      <th>Frc.Same<\/th>\n      <th>SkewKurt<\/th>\n      <th>Collinear<\/th>\n      <th>NegCorr<\/th>\n      <th>iCode<\/th>\n      <th>Frc.Avail<\/th>\n      <th>Frc.Same<\/th>\n      <th>SkewKurt<\/th>\n      <th>Collinear<\/th>\n      <th>NegCorr<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"visible":false,"targets":[6,7,8,9,10,11]},{"className":"dt-right","targets":[1,2,6,7,8,9,10,11]}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[6]; $(this.api().cell(row, 0).node()).css({'background-color':value == 0 ? \"white\" : value == 1 ? \"#ffc266\" : null});\nvar value=data[7]; $(this.api().cell(row, 1).node()).css({'background-color':value == 0 ? \"white\" : value == 1 ? \"#ffc266\" : null});\nvar value=data[8]; $(this.api().cell(row, 2).node()).css({'background-color':value == 0 ? \"white\" : value == 1 ? \"#ffc266\" : null});\nvar value=data[9]; $(this.api().cell(row, 3).node()).css({'background-color':value == 0 ? \"white\" : value == 1 ? \"#ffc266\" : null});\nvar value=data[10]; $(this.api().cell(row, 4).node()).css({'background-color':value == 0 ? \"white\" : value == 1 ? \"#ffc266\" : null});\nvar value=data[11]; $(this.api().cell(row, 5).node()).css({'background-color':value == 0 ? \"white\" : value == 1 ? \"#ffc266\" : null});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+</div>
+</div>
+<p>The table automatically highlights any cells where a threshold is exceeded and the indicator is flagged.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

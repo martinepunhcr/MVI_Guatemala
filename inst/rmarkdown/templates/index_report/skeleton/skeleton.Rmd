@@ -1,6 +1,6 @@
 ---
 title: "Index Building - technical documentation"
-author: "Your Name"
+author: "UNHCR"
 date: " `r format(Sys.Date(),  '%d %B %Y')`"
 output:
   unhcrdown::html_page:
@@ -9,7 +9,14 @@ output:
     toc_float: true 
 params:
   datafolder: "data-raw" ## This is the default folder where to put you data in
-  data: "data.xlsx" ## Name of the data file
+  data: "data_module-input.xlsx" ## Name of the data file
+  shp: "gtm_admbnda_adm2_ocha_conred_20190207.shp" ## name of the shapefile to create the map
+  max_winsorisation:  5
+  skew_thresh:  2
+  kurt_thresh: 3.5
+  same_thresh: 0.5,
+  collin_thresh: 0.9,
+  neg_corr_thresh: -0.4
 ---
 
 ```{r setup, include=FALSE}
@@ -32,55 +39,47 @@ library("ggplot2")
 library("unhcrthemes")
 library("COINr")
 library("BuildIndex")
+
+file_path = here::here(params$datafolder, params$data)
+shp_path = here::here(params$datafolder, params$shp) 
+
+## Comment the following 2 lines to test the template with your data - as per YAML parameter above!
+# file_path = system.file("data_input/data_module-input.xlsx", package = "BuildIndex")
+# file_path = system.file("data_input/gtm_admbnda_adm2_ocha_conred_20190207.shp", package = "BuildIndex")
 ```
 
 
 ## Introduction
 
-This document records the construction of the Index, in particular the process from the denominated input data to the initial index results. This follows on from the "Indicator Analysis", in which indicators were analysed and eventually screened/selected.
+This document records the construction of the Index.  For convenience the main steps (Data treatment; Normalisation and Aggregation) have now been condensed down and simpliefied to a dedicated function:
 
-The steps followed here will be:
 
-- Outlier treatment
-- Normalisation
-- Aggregation
+### Data treatment
 
-We begin by building the Index coin following the same steps as in the "indicator analysis". For convenience these steps have now been condensed down to a dedicated function:
+ * __Outlier treatment__ : Outlier treatment aims to adjust the distributions of highly skewed, or fat tailed indicators, including cases where there are outliers that are not characteristic of the rest of the distribution. This is done to improve the discriminatory power of the indicator in aggregation. For more on this, see [here](https://bluefoxr.github.io/COINrDoc/data-treatment.html).
+
+ * __skew and kurtosis__ : If the absolute skew is greater than 2 AND the kurtosis is greater than 3.5, data treatment is applied (step 3 onwards), else leave the indicator as it is and move back to 1 for the next indicator.
+
+ * __Winsorisation__ :  up to a maximum number of five points. Check after each Winsorised point whether skew and kurtosis fall back within the limits specified. If so, apply no further data treatment and move to the next indicator. If the maximum number of Winsorised points is reached and skew and kurtosis are still outside the thresholds, "undo" any Winsorised points and apply a log transformation.
+
+## Display index framework 
 
 ```{r}
-source(here::here("R/old","build_MVI.R"))
-
-MVI <- build_MVI_coin()
+MVI <- f_data_input(file_path )
+f_print_coin(MVI)
+f_plot_framework(MVI)
 ```
 
-With the coin in hand we can now proceed to the construction steps.
-
-## Outlier treatment
-
-Outlier treatment aims to adjust the distributions of highly skewed, or fat tailed indicators, including cases where there are outliers that are not characteristic of the rest of the distribution. This is done to improve the discriminatory power of the indicator in aggregation. For more on this, see [here](https://bluefoxr.github.io/COINrDoc/data-treatment.html).
-
-As discovered in the previous document, a number of indicators require data treatment. To deal with this we follow a standard procedure which looks like this, for each indicator:
-
-1. Check the skew and kurtosis of the indicator
-2. If the absolute skew is greater than 2 AND the kurtosis is greater than 3.5, data treatment is applied (step 3 onwards), else leave the indicator as it is and move back to 1 for the next indicator.
-3. Apply Winsorisation up to a maximum number of five points. Check after each Winsorised point whether skew and kurtosis fall back within the limits specified. If so, apply no further data treatment and move to the next indicator.
-4. If the maximum number of Winsorised points is reached and skew and kurtosis are still outside the thresholds, "undo" any Winsorised points and apply a log transformation.
-
-This process is built into COINr as a default, so we can apply it easily:
+A number of indicators might require data treatment. To deal with this we follow a standard procedure is built as a default
+ 
 
 ```{r}
-MVI <- qTreat(MVI, dset = "Raw", winmax = 5, skew_thresh = 2, kurt_thresh = 3.5)
-```
+MVI <- f_analyse_indicators(MVI)
+f_display_indicator_analysis(MVI)
 
-Let's check the skew/kurtosis stats.
 
-```{r}
-source(here::here("R/old","helpers.R")) |>
-  suppressMessages()
-
-MVI$Analysis$Treated$Dets_Table |>
-  tidy_treatment_details() |>
-  filter(!Pass_0)
+MVI <- f_build_index(MVI)
+f_display_results_table(MVI)
 ```
 
 We can see that most indicators have been dealt with by applying a log transformation as expected, whereas a few have been Winsorised. In total, after treatment four indicators still fall outside the skew/kurtosis limits. We will check these visually:
@@ -89,19 +88,33 @@ We can see that most indicators have been dealt with by applying a log transform
 outlying_indicators <- MVI$Analysis$Treated$Dets_Table$iCode[!MVI$Analysis$Treated$Dets_Table$check_SkewKurt2.Pass] |>
   na.omit()
 
-plot_dist(MVI, dset = "Treated", iCodes = outlying_indicators, type = "Dot")
+COINr::plot_dist(MVI, 
+                 dset = "Treated", 
+                 iCodes = outlying_indicators, 
+                 type = "Dot")
 ```
 
 This shows a problem: that one of the indicators is unusually negatively skewed. In this case, applying a log transformation won't work because that corrects for positive skew. To deal with this I have encoded a function in COINr which can deal with negative skew as well, and this is invoked here. In fact, it checks the direction of skew and applies the correct transformation.
 
 ```{r}
-MVI <- qTreat(MVI, dset = "Raw", winmax = 5, skew_thresh = 2, kurt_thresh = 3.5, f2 = "log_CT_plus")
+MVI <- qTreat(MVI, 
+              dset = "Raw", 
+              winmax = 5, 
+              skew_thresh = 2, 
+              kurt_thresh = 3.5, 
+              f2 = "log_CT_plus")
 ```
+
 Now let's check the outcome. We just focus on "C.I.6" here which is the problematic indicator:
 
 ```{r}
-p1 <- plot_dist(MVI, dset = "Treated", iCodes = "C.I.6", type = "Dot")
-p2 <- plot_scatter(MVI, dsets = c("Raw", "Treated"), iCodes = "C.I.6")
+p1 <- COINr::plot_dist(MVI, 
+                       dset = "Treated", 
+                       iCodes = "C.I.6", 
+                       type = "Dot")
+p2 <- COINr::plot_scatter(MVI, 
+                          dsets = c("Raw", "Treated"), 
+                          iCodes = "C.I.6")
 
 library(patchwork)
 p1 + p2
@@ -109,30 +122,32 @@ p1 + p2
 
 This demonstrates the effectiveness of the new transformation: it has normalised the indicator but retaining its ordering. The scale of the indicator is now different (as with all transformations) but this is not important since indicators will anyway be scaled between 0-100 in the following step, and the scaling and transformation is only for the purposes of aggregation. When presenting individual indicators, we will of course present the real data.
 
-## Normalise
+ * __Normalise__ : Following this we can normalise the indicators using a standard per default min-max approach. This scales each indicator onto the $[0,100]$ interval.
 
-Following this we can normalise the indicators using a standard min-max approach. This scales each indicator onto the $[0,100]$ interval.
 
-```{r}
-MVI <- Normalise(MVI, dset = "Treated")
-```
-
-## Aggregate
-
-Now we create aggregate levels by aggregating up to the index. We recall that this aggregates by using the weighted arithmetic average of the normalised scores. Weights have been defined in the input file (input metadata) and are currently set as all equal. We will allow weight adjustment in a later step, but for now we aggregate using the default approach.
-
-```{r}
-MVI <- Aggregate(MVI, dset = "Normalised")
-```
-
-This has created all the aggregate scores: categoria scores, dimension scores, and the MVI scores themselves.
+ * __Aggregate__ : Now we create aggregate levels by aggregating up to the index. Different options will be used and generated for further comparison by field experts
 
 ## Results
 
 Our first view of the results is as a results table. The table is sorted by default from the highest scoring (most vulnerable) municipalities downwards, based on the Index scores.
 
+### Arithmetic mean
+
 ```{r}
-results_table <- get_results(MVI, dset = "Aggregated", tab_type = "Aggs", also_get = "uName", nround = 1) 
+MVI1 <- f_build_index(coin = MVI, 
+                     agg_method = "a_amean", #   (arithmetic mean),
+                     max_winsorisation = 5,
+                     skew_thresh = 2,
+                     kurt_thresh = 3.5)
+```
+
+
+
+```{r}
+results_table <- COINr::get_results(MVI1, dset = "Aggregated",
+                             tab_type = "Aggs",
+                             also_get = "uName", 
+                             nround = 1) 
 
 results_table |>
   DT::datatable() |>
@@ -143,37 +158,217 @@ results_table |>
 These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. Here, since we have a lot of municipalities I will just plot the top thirty. They are coloured by departamento.
 
 ```{r}
-plot_bar(MVI, dset = "Aggregated", iCode = "MVI", by_group = "Departamento", filter_to_ends = list(top = 30))
+COINr::plot_bar(MVI1, 
+                dset = "Aggregated", 
+                iCode = "MVI", 
+               ##  by_group = "Departamento", 
+                filter_to_ends = list(top = 30))
 ```
 
 We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.
 
 ```{r}
-plot_bar(MVI, dset = "Aggregated", iCode = "MVI", stack_children = TRUE, filter_to_ends = list(bottom = 30))
+COINr::plot_bar(MVI1, 
+                dset = "Aggregated", 
+                iCode = "MVI", 
+                stack_children = TRUE, 
+                filter_to_ends = list(bottom = 30))
 ```
 
 As a last view of the results (for the moment), we can plot a choropleth map. This is based on the municipal shape files.
 
 ```{r}
-#| message: false
-#| warning: false
-#| out-width: "100%"
+f_plot_map(coin = MVI1, 
+           dset = "Aggregated",
+           iCode = "MVI", 
+           shp_path  )
+```
 
-source(here::here("R/old","map_tests.R"))
-
-plot_choropleth(MVI, dset = "Aggregated", iCode = "MVI")
+```{r}
+f_export_to_excel(coin = MVI1, 
+                  fname = here::here("inst", "index_export_artih.xlsx"))
 ```
 
 
+### Geometric mean
 
-## Conclusions
+```{r}
+MVI2 <- f_build_index(coin = MVI, 
+                     agg_method = "a_gmean", # (geometric mean),
+                     max_winsorisation = 5,
+                     skew_thresh = 2,
+                     kurt_thresh = 3.5)
+```
 
-The next steps from here are probably:
+```{r}
+results_table <- COINr::get_results(MVI2, dset = "Aggregated",
+                             tab_type = "Aggs",
+                             also_get = "uName", 
+                             nround = 1) 
 
-- The "reality check" of the results: do they make sense to you as experts in the field?
-- Have a think about each step of the methodology: should we do anything differently? We can anyway always try alternative approaches and compare the differences.
-- Check again the resulting structure of the index: are there any big gaps in terms of things measured? Any reshuffles of indicators/categorias still needed?
+results_table |>
+  DT::datatable() |>
+  DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
+```
 
-The aim being to be fairly sure, before proceeding, that the core methodology is sound and the results are realistic. I would then "finalise" the indicator analysis and index construction documents and tidy up figures etc.
 
-After that, we can move to the next phases. Namely, I would begin to build the "modules" for the steps of the index construction. Some of the code written here can be used to some extent. We will also need a weight adjustment function. Then the code can be packaged more cleanly (it can even be a small R package for convenience) and documented.
+These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. Here, since we have a lot of municipalities I will just plot the top thirty. They are coloured by departamento.
+
+```{r}
+COINr::plot_bar(MVI2, 
+                dset = "Aggregated", 
+                iCode = "MVI", 
+               #  by_group = "Departamento", 
+                filter_to_ends = list(top = 30))
+```
+
+We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.
+
+```{r}
+COINr::plot_bar(MVI2, 
+                dset = "Aggregated", 
+                iCode = "MVI", 
+                stack_children = TRUE, 
+                filter_to_ends = list(bottom = 30))
+```
+
+As a last view of the results (for the moment), we can plot a choropleth map. This is based on the municipal shape files.
+
+```{r}
+f_plot_map(coin = MVI2, 
+           dset = "Aggregated",
+           iCode = "MVI", 
+           shp_path  )
+```
+
+```{r}
+f_export_to_excel(coin = MVI2, 
+                  fname = here::here("inst", "index_export_geo.xlsx"))
+```
+
+### benefit of doubt
+
+```{r}
+MVI3 <- f_build_index(coin = MVI, 
+                     agg_method = "a_bod", # (benefit of doubt via Compind package) 
+                     max_winsorisation = 5,
+                     skew_thresh = 2,
+                     kurt_thresh = 3.5)
+```
+
+
+```{r}
+results_table <- COINr::get_results(MVI3, dset = "Aggregated",
+                             tab_type = "Aggs",
+                             also_get = "uName", 
+                             nround = 1) 
+
+results_table |>
+  DT::datatable() |>
+  DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
+```
+
+
+These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. Here, since we have a lot of municipalities I will just plot the top thirty. They are coloured by departamento.
+
+```{r}
+COINr::plot_bar(MVI3, 
+                dset = "Aggregated", 
+                iCode = "MVI", 
+               #  by_group = "Departamento", 
+                filter_to_ends = list(top = 30))
+```
+
+We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.
+
+```{r}
+COINr::plot_bar(MVI3, 
+                dset = "Aggregated", 
+                iCode = "MVI", 
+                stack_children = TRUE, 
+                filter_to_ends = list(bottom = 30))
+```
+
+As a last view of the results (for the moment), we can plot a choropleth map. This is based on the municipal shape files.
+
+```{r}
+f_plot_map(coin = MVI3, 
+           dset = "Aggregated",
+           iCode = "MVI", 
+           shp_path  )
+```
+
+```{r}
+# f_export_to_excel(coin = MVI3, 
+#                   fname = here::here("inst", "index_export_bod.xlsx"))
+```
+
+### Wroclaw Taxonomic Method
+
+```{r}
+MVI4 <- f_build_index(coin = MVI, 
+                     agg_method = "a_wroclaw", # (Wroclaw Taxonomic Method via Compind)
+                     max_winsorisation = 5,
+                     skew_thresh = 2,
+                     kurt_thresh = 3.5)
+
+```
+
+```{r}
+results_table <- COINr::get_results(MVI4, dset = "Aggregated",
+                             tab_type = "Aggs",
+                             also_get = "uName", 
+                             nround = 1) 
+
+results_table |>
+  DT::datatable() |>
+  DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
+```
+
+
+These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. Here, since we have a lot of municipalities I will just plot the top thirty. They are coloured by departamento.
+
+```{r}
+COINr::plot_bar(MVI4, 
+                dset = "Aggregated", 
+                iCode = "MVI", 
+               #  by_group = "Departamento", 
+                filter_to_ends = list(top = 30))
+```
+
+We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.
+
+```{r}
+COINr::plot_bar(MVI4, 
+                dset = "Aggregated", 
+                iCode = "MVI", 
+                stack_children = TRUE, 
+                filter_to_ends = list(bottom = 30))
+```
+
+As a last view of the results (for the moment), we can plot a choropleth map. This is based on the municipal shape files.
+
+```{r}
+f_plot_map(coin = MVI4, 
+           dset = "Aggregated",
+           iCode = "MVI", 
+           shp_path  )
+```
+
+```{r}
+# f_export_to_excel(coin = MVI4, 
+#                   fname = here::here("inst", "index_export_wro.xlsx"))
+```
+
+## Next steps 
+
+
+"reality check" of the results with the Country Panel Expert
+
+Do the results options make sense to field experts?
+
+Are there any big gaps in terms of indicators measured? 
+
+Are there need to reshuffles of indicators/categorias ?
+
+

@@ -3,45 +3,49 @@
 #' Plot map
 #' 
 #' Plots an interactive choropleth map of the index or any indicator, using 
-#' supplied shape files.
+#' supplied shape files. This is powered by the leaflet package.
 #' 
-#' @param coin COIN object, or list with first entry is the indicator metadata, 
-#'              second entry is the aggregation metadata
+#' Note we will need some checks here to make sure the shape file is compatible with the
+#' data. This can be dealt with in the app phase.
 #' 
+#' @param coin The coin
+#' @param dset Name of data set in the coin from which to extract the indicator/aggregate to plot
+#' @param iCode Code of indicator within `dset` to plot
+#' @param shp_path Assume a shapefile with ADM2_PCODE being the main key to use\
+#'                with thedefault admin2Pcode within the indicator main excel file
+#'                
+#'                 Guatemala example is currently at `"./inst/shp/gtm_admbnda_adm2_ocha_conred_20190207.shp"`
 #' 
-#' @param shp_path is currently at "shp/gtm_admbnda_adm2_ocha_conred_20190207.shp"
 #' @importFrom COINr get_data
 #' @importFrom sf read_sf
 #' @importFrom leaflet leaflet labelOptions highlightOptions addTiles addLegend
-#' @return
+#' 
+#' @return a leaflet object
 #' 
 #' @export
 #' @examples
 #' MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
 #'                                             package = "BuildIndex") )
 #' 
-#' ## when using create a data-raw folder and put you data input xlsx file there
-#' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
+#' shp_path <-  system.file("data_input/gtm_admbnda_adm2_ocha_conred_20190207.shp",
+#'                                             package = "BuildIndex")
 #' 
-#' MVI2 <- f_build_index(coin = MVI)
 #' 
-#' f_plot_map(coin = MVI2, 
+#' MVI <- f_build_index(MVI)
+#' 
+#' f_plot_map(coin = MVI, 
 #'            dset = "Aggregated",
 #'            iCode = "MVI", 
-#'            shp_path = system.file("shp/gtm_admbnda_adm2_ocha_conred_20190207.shp",
-#'                                             package = "BuildIndex")  )
+#'            shp_path = shp_path  )
 #' ## when using ut your shape in the folder ---
-#'          #  shp_path = here::here("inst/shp", "gtm_admbnda_adm2_ocha_conred_20190207.shp")           )
+#'          #  shp_path = here::here("inst/data-input", "gtm_admbnda_adm2_ocha_conred_20190207.shp")           )
 f_plot_map <- function(coin, 
                        dset = "Aggregated",
                        iCode = "MVI", 
                        shp_path){
-
- # shp <- read_sf("shp/gtm_admbnda_adm2_ocha_conred_20190207.shp")
   
-  
+  # read shape file
   shp <- sf::read_sf(shp_path)
-  
 
   # get data first
   df_plot <- COINr::get_data(coin, dset = dset, iCodes = iCode)

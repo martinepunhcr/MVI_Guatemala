@@ -4,7 +4,7 @@
 #'
 #' Plots the structure of the index using a sunburst plot using **plotly**.
 #'
-#' @param COIN COIN object, or list with first entry is the indicator metadata, second entry is the aggregation metadata
+#' @param COIN coin object
 #' @param seg_cols A character vector of colour codes, one for each segment in the plot. The length of this
 #' vector must be equal to the number of segments, i.e. the sum of the number of indicators and aggregates
 #' in each level. 
@@ -19,8 +19,6 @@
 #' MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
 #'                                             package = "BuildIndex") )
 #' 
-#' ## when using create a data-raw folder and put you data input xlsx file there
-#' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
 #' f_plot_framework(MVI)
 f_plot_framework <- function(coin, seg_cols = NULL){
 
@@ -42,7 +40,10 @@ f_plot_framework <- function(coin, seg_cols = NULL){
       parents = iMeta$Parent,
       values = iMeta$EffWeight,
       type = 'sunburst',
-      branchvalues = 'total'
+      branchvalues = 'total',
+      text = iMeta$iName,
+      hoverinfo = 'text',
+      texttemplate = '%{label}'
     )
   } else {
     stopifnot(is.vector(seg_cols),
@@ -58,7 +59,10 @@ f_plot_framework <- function(coin, seg_cols = NULL){
       values = iMeta$EffWeight,
       type = 'sunburst',
       branchvalues = 'total',
-      marker = list(colors = seg_cols)
+      marker = list(colors = seg_cols),
+      text = iMeta$iName,
+      hoverinfo = 'text',
+      texttemplate = '%{label}'
     )
   }
 

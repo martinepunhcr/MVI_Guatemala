@@ -4,34 +4,56 @@
 \alias{f_analyse_indicators}
 \title{Analyse indicators}
 \usage{
-f_analyse_indicators(coin)
+f_analyse_indicators(
+  coin,
+  dat_avail_thresh = 0.66,
+  skew_thresh = 2,
+  kurt_thresh = 3.5,
+  same_thresh = 0.5,
+  collin_thresh = 0.9,
+  neg_corr_thresh = -0.4
+)
 }
 \arguments{
-\item{coin}{COIN object, or list with first entry is the indicator metadata, 
-second entry is the aggregation metadata}
+\item{coin}{The coin}
+
+\item{dat_avail_thresh}{default setting is  0.66,}
+
+\item{skew_thresh}{default setting is  2,}
+
+\item{kurt_thresh}{default setting is  3.5,}
+
+\item{same_thresh}{default setting is  0.5,}
+
+\item{collin_thresh}{default setting is  0.9,}
+
+\item{neg_corr_thresh}{default setting is  -0.4}
 }
 \value{
-coin COIN object
+coin Updated coin with analysis tables
 }
 \description{
 Takes a coin and outputs an analysis of indicators. The objective is to look
 for any "statistically-problematic" indicators, based on:
+}
+\details{
 - data availability
 - high proportion of repeated data values
 - outliers as defined by skew and kurtosis
 - collinearity within first aggregation level (category)
 - negative correlation within first aggregation level (category)
-}
-\details{
+
 The output can be viewed in R or as an interactive data frame.
 Uses Spearman rank correlation to deal with skewed distributions.
 Operates on the Raw data set.
+
+The output is a coin with the results attached. This is so that on export, the
+results will also be exported easily.
 }
 \examples{
 MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
                                             package = "BuildIndex") )
 
-## when using create a data-raw folder and put you data input xlsx file there
-# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
-f_analyse_indicators(MVI)
+
+MVI <- f_analyse_indicators(MVI)
 }

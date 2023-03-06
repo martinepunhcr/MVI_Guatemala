@@ -7,23 +7,15 @@
 f_generate_results(coin)
 }
 \arguments{
-\item{coin}{COIN object, or list with first entry is the indicator metadata, 
-second entry is the aggregation metadata}
+\item{coin}{The coin}
 }
 \value{
-coin COIN object
+Updated coin.
 }
 \description{
-Generates sorted results tables and attaches back to the coin
+Generates sorted results tables and attaches back to the coin. This is a helper
+function which is called by [f_build_index()].
 }
 \examples{
-MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
-                                            package = "BuildIndex") )
-
-## when using create a data-raw folder and put you data input xlsx file there
-# MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
-
-MVI2 <- f_build_index(coin = MVI)
-
-f_generate_results(coin = MVI2)
+#
 }

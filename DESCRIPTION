@@ -12,6 +12,7 @@ Description: .
 License: MIT + file LICENSE
 Imports: 
     COINr,
+    Compind,
     dplyr,
     DT,
     here,

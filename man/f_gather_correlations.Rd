@@ -6,6 +6,12 @@
 \usage{
 f_gather_correlations(X)
 }
+\arguments{
+\item{X}{a frame with the 2 indicators to check `"Ind1"`  Ind1 &  `"Ind1"`}
+}
+\value{
+nothing a report is created...
+}
 \description{
 Helper function for indicator analysis
 }

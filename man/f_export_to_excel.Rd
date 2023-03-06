@@ -7,14 +7,17 @@
 f_export_to_excel(coin, fname = "index_export.xlsx")
 }
 \arguments{
-\item{coin}{COIN object, or list with first entry is the indicator metadata, 
-second entry is the aggregation metadata}
+\item{coin}{The coin, with results present.}
 
-\item{fname}{file name}
+\item{fname}{file name to write the results to.}
+}
+\value{
+Writes an Excel spreadsheet.
 }
 \description{
 Simplified export to Excel with some formatting
-Note if we change the index structure this may need adjusting.
+Note if we change the index structure, the conditional formatting will need
+to be adjusted.
 }
 \examples{
 MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
@@ -22,9 +25,9 @@ MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
 
 ## when using create a data-raw folder and put you data input xlsx file there
 # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
-MVI2 <- f_analyse_indicators(coin = MVI)
-MVI3 <- f_build_index(coin = MVI2)
+MVI <- f_analyse_indicators(MVI)
+MVI <- f_build_index(MVI)
 
-f_export_to_excel(coin = MVI3, 
+f_export_to_excel(coin = MVI, 
                   fname = here::here("inst", "index_export.xlsx"))
 }

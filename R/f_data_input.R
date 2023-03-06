@@ -2,26 +2,35 @@
 
 #' Data input
 #' 
-#' Outputs a constructed coin
-#' Reads an Excel file found at `file_path` which is expected to be in a specific
-#' format. See "inst/data_input/data_module-input.xlsx" for example.
-#' .
+#' Reads a formatted Excel file found at `file_path` and outputs a constructed coin.
+#' 
+#' On reading the Excel file, this function does the following:
+#' 
+#' - Data is split into data and metadata and tidied
+#' - Metadata is merged with hard-coded index structure
+#' - Any indicators with no data at all are removed
+#' - Any resulting aggregation groups with no "children" are removed
+#' - A coin is assembled using COINr and this is the function output
+#' 
+#' If indicators/groups are removed, a message is sent to the console.
+#' 
+#' The Excel file is required to be in a fairly strict format: an example is given at
+#' `inst/data_input/data_module-input.xlsx`. This template is still a work in progress
+#' and can be modified in the app phase following further feedback. See also comments
+#' in the main vignette.
 #' 
 #' @param file_path path to the excel file where we have the raw data - organised
-#'      with the format exepected by COINR package
+#'      with the format expected by COINr package
 #'      
 #' @importFrom readxl read_excel  cell_limits 
 #' @importFrom COINr new_coin   
 #' 
-#' @return coin object with a COINR class
+#' @return coin-class object
 #' 
 #' @export
 #' @examples
 #' MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
 #'                                             package = "BuildIndex") )
-#' 
-#' ## when using create a data-raw folder and put you data input xlsx file there
-#' # MVI <- f_data_input(here::here("data-raw", "data_module-input.xlsx"))
 #' 
 f_data_input <- function(file_path){
   
@@ -43,25 +52,30 @@ f_data_input <- function(file_path){
     path = file_path, sheet = "Data",
     range = readxl::cell_limits(ul = idata_topleft, lr = c(NA, NA))
     )
-  iMeta <- readxl::read_excel(
-    path = file_path, sheet = "Data",
-    range = readxl::cell_limits(ul = imeta_topleft,
-                        lr = c(imeta_botleft[1], NA)),
-    col_names = FALSE
-  ) |> suppressMessages()
   
-  
-  ## @will Maybe need to do some format checking
-
   # Tidy iData ----
 
   names(iData)[names(iData) == ucode_name] <- "uCode"
   names(iData)[names(iData) == uname_name] <- "uName"
+  
+  # remove indicators with no data
+  i_nodata <- names(iData)[colSums(!is.na(iData)) == 0]
+  iData <- iData[!(names(iData) %in% i_nodata)]
+  if(length(i_nodata) > 0){
+    message("Removed indicators with no data points: ",
+            paste0(i_nodata, collapse = ", "))
+  }
 
-
+  
+  ## Read in metadata ----
+  iMeta <- readxl::read_excel(
+    path = file_path, sheet = "Data",
+    range = readxl::cell_limits(ul = imeta_topleft,
+                        lr = c(imeta_botleft[1], NA)),
+    col_names = FALSE ) |> 
+    suppressMessages()
+  
   # Tidy and merge metadata ----
-
-  # tidy existing
   iMeta <- as.data.frame(t(iMeta))
   names(iMeta) <- c("Weight", "Direction", "Parent", "iName", "iCode")
   iMeta$Weight <- as.numeric(iMeta$Weight)
@@ -72,44 +86,42 @@ f_data_input <- function(file_path){
   iMeta$Level <- 1
   iMeta$Type <- "Indicator"
 
+  ## @will Maybe need to do some format checking
+  ## Will: I agree, but this can only be done properly once the input template is finalised, so
+  ## I think this has to be left for the app phase.
   # merge with aggregate levels
   
   ## @will - why not simply pulling this from the same excel ??
+  ## Will: we don't want to give that flexibility/complexity to the user.
+  ## OK! - - just puting it in for testing at the moment - 
   
-#  iMeta_aggs <- readRDS(here::here("inst/data_input", "iMeta_aggs.RDS"))
- iMeta_aggs <- readRDS(system.file("data_input/iMeta_aggs.RDS", package = "BuildIndex") ) 
+  #  iMeta_aggs <- readRDS(here::here("inst/data_input", "iMeta_aggs.RDS"))
+  #  iMeta_aggs <- readRDS(system.file("data_input/iMeta_aggs.RDS", package = "BuildIndex") )
+  # write.csv( iMeta_aggs, here::here("inst", "iMeta_aggs.csv"), row.names = TRUE)
   
-  iMeta <- rbind(iMeta, iMeta_aggs)
-
-
-  # Further tidying ----
-
-  # remove indicators with no data
-
-  i_nodata <- names(iData)[colSums(!is.na(iData)) == 0]
-  iData <- iData[!(names(iData) %in% i_nodata)]
+  ## Read in aggregation metadata ----
+  iMeta_aggs <- readxl::read_excel( path = file_path, sheet = "iMeta_aggs") 
+ 
+  iMeta <- rbind(iMeta, iMeta_aggs) |>
+    #names(iMeta)
+           dplyr::select( iCode,Parent, iName, Weight, Direction, Level, Type)
+  
+  # remove indicators metadata if there's no corresponding no data -
+  # Aka level 1 -- cf cleaning above
+  ## Should allow to avoid error "One or more entries in Parent not found in iCode" 
   iMeta <- iMeta[!(iMeta$iCode %in% i_nodata), ]
 
-  if(length(i_nodata) > 0){
-    message("Removed indicators with no data points: ",
-            paste0(i_nodata, collapse = ", "))
-  }
-
   # remove any second-level groups with no children
-
   no_children_1 <- iMeta$iCode[iMeta$Level == 2 & !(iMeta$iCode %in% iMeta$Parent)]
   iMeta <- iMeta[!(iMeta$iCode %in% no_children_1), ]
-
   if(length(no_children_1) > 0){
     message("Removed categories containing no indicators: ",
             paste0(no_children_1, collapse = ", "))
   }
 
   # remove any third-level groups with no children
-
   no_children_2 <- iMeta$iCode[iMeta$Level == 3 & !(iMeta$iCode %in% iMeta$Parent)]
   iMeta <- iMeta[!(iMeta$iCode %in% no_children_1), ]
-
   if(length(no_children_2) > 0){
     message("Removed dimensions containing no categories: ", no_children_2,
             paste0(no_children_2, collapse = ", "))
@@ -117,8 +129,7 @@ f_data_input <- function(file_path){
 
 
   # Build coin and output ----
-
-  coin <- COINr::new_coin(iData, iMeta, quietly = TRUE,
+  coin <- COINr::new_coin(iData, iMeta, quietly = FALSE,
            level_names = c("Indicator", "Category", "Dimension", "Index"))
   
   return(coin)
