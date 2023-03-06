@@ -16,6 +16,9 @@
     <loc>/index.html</loc>
   </url>
   <url>
+    <loc>/reference/a_bod.html</loc>
+  </url>
+  <url>
     <loc>/reference/f_add_indicators.html</loc>
   </url>
   <url>
@@ -35,6 +38,9 @@
   </url>
   <url>
     <loc>/reference/f_display_results_table.html</loc>
+  </url>
+  <url>
+    <loc>/reference/f_export_report.html</loc>
   </url>
   <url>
     <loc>/reference/f_export_to_excel.html</loc>

@@ -4,7 +4,9 @@
 #' 
 #' Helper function for indicator analysis
 #' 
-#' @return
+#' @param X a frame with the 2 indicators to check `"Ind1"`  Ind1 &  `"Ind1"`
+#' 
+#' @return  nothing a report is created...
 #' 
 #' @export
 #' @examples

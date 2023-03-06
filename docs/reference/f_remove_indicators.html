@@ -64,12 +64,11 @@ codes in `remove_indicators`. After removal, any results are regenerated
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>coin</dt>
-<dd><p>COIN object, or list with first entry is the indicator metadata, 
-second entry is the aggregation metadata</p></dd>
+<dd><p>A coin.</p></dd>
 
 
 <dt>remove_indicators</dt>
-<dd></dd>
+<dd><p>Character vector of indicator codes to remove.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -81,7 +80,8 @@ second entry is the aggregation metadata</p></dd>
     <div id="details">
     <h2>Details</h2>
     <p>The original data is always preserved so indicators can be restored.
-Analysis tables are not currently re-run so this has to be done separately.</p>
+Analysis tables are not currently re-run so this would have to be done separately.
+However, there is actually no need to re-run.</p>
     </div>
 
     <div id="ref-examples">
@@ -90,13 +90,34 @@ Analysis tables are not currently re-run so this has to be done separately.</p>
 <span class="r-in"><span>                                            package <span class="op">=</span> <span class="st">"BuildIndex"</span><span class="op">)</span> <span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Removed indicators with no data points: A.A.1, A.M.5, A.M.6, A.V.5, S.T.3, C.C.2, C.C.3, C.C.4, C.J.1, C.J.3, C.S.1, C.S.2, C.S.3</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Removed categories containing no indicators: Acc_Hum</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> iData checked and OK.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> iMeta checked and OK.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Written data set to .$Data$Raw</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## when using create a data-raw folder and put you data input xlsx file there</span></span></span>
-<span class="r-in"><span><span class="co"># MVI &lt;- f_data_input(here::here("data-raw", "data_module-input.xlsx"))</span></span></span>
-<span class="r-in"><span><span class="va">MVI2</span> <span class="op">&lt;-</span> <span class="fu"><a href="f_analyse_indicators.html">f_analyse_indicators</a></span><span class="op">(</span><span class="va">MVI</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">MVI3</span> <span class="op">&lt;-</span> <span class="fu">f_remove_indicators</span><span class="op">(</span><span class="va">MVI2</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"S.G.3"</span>, <span class="st">"A.M.1"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># call print method</span></span></span>
+<span class="r-in"><span><span class="va">MVI</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> --------------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> A coin with...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> --------------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Input:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Units: 340 (GT0101, GT0102, GT0103, ...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Indicators: 41 (S.A.1, S.A.3, S.A.4, ...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Denominators: 0 ()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Groups: 0 (none)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Structure:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Level 1 Indicator: 41 indicators (A.D.1, A.M.1, A.M.2, ...) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Level 2 Category: 12 groups (Desastres, Desplaz, Violencia, ...) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Level 3 Dimension: 3 groups (Amenazas, Cap_Resp, Sit_SocEc) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Level 4 Index: 1 groups (MVI) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Data sets:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Raw (340 units)</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">MVI</span> <span class="op">&lt;-</span> <span class="fu">f_remove_indicators</span><span class="op">(</span><span class="va">MVI</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"S.G.3"</span>, <span class="st">"A.M.1"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> coin has been regenerated using new specs.</span>
-<span class="r-in"><span><span class="va">MVI3</span></span></span>
+<span class="r-in"><span><span class="co"># compare with previous</span></span></span>
+<span class="r-in"><span><span class="va">MVI</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> --------------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> A coin with...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> --------------</span>
@@ -107,9 +128,9 @@ Analysis tables are not currently re-run so this has to be done separately.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Groups: 0 (none)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Structure:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Level 1 Indicator: 39 indicators (A.D.1, A.V.1, A.V.2, ...) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Level 2 Category: 12 groups (Desastres, Violencia, Comunitaria, ...) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Level 3 Dimension: 4 groups (Amenazas, Cap_Resp, Mov_Hum, ...) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Level 1 Indicator: 39 indicators (A.D.1, A.M.2, A.M.4, ...) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Level 2 Category: 12 groups (Desastres, Desplaz, Violencia, ...) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Level 3 Dimension: 3 groups (Amenazas, Cap_Resp, Sit_SocEc) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Level 4 Index: 1 groups (MVI) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Data sets:</span>

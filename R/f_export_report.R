@@ -11,7 +11,7 @@
 #   template_create_dir = TRUE
 # )
 #' 
-#' @return
+#' @return nothing a report is created...
 #' 
 #' @export
 #' @examples
