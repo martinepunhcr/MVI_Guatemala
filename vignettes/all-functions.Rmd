@@ -520,7 +520,20 @@ f_export_to_excel(coin = MVI3,
   
 
   
+
+# Generate technical report
+
+    
+
   
+
+```{r example-f_export_report}
+f_export_report()
+```
+
+  
+
+    
   
   
   
