@@ -51,12 +51,16 @@ shp_path = here::here(params$datafolder, params$shp)
 
 # Introduction
 
-This document records the construction of the Index. 
+This document records the construction of the Severity Index in Guatemala. It generates Transparency, Robustness & Accuracy as it follows the standards [10 steps approach](https://knowledge4policy.ec.europa.eu/sites/default/files/10-step-pocket-guide-to-composite-indicators-and-scoreboards.pdf) in a reproducible approach, using [coinR package](https://bluefoxr.github.io/COINr/). 
+
+It also ensures Credibility & Engagement through the effective participation of field experts as the last stage of the process.
 
 
 # Conceptual Framework
 
-Bsed on available indicators in the country, the conceptual framework can be represented in the diagramme below: 
+Based on available indicators in the country, the conceptual framework can be represented in the interactive diagram below.
+
+You can click on the diagram to drill down the different elements of the index. 
 
 ```{r}
 MVI <- f_data_input(file_path )
@@ -67,6 +71,8 @@ f_plot_framework(MVI)
 In details, the composite indicators can be described below:
 
 ```{r}
+
+## it needs to come with a description of each column for proper understanding
 f_print_coin(MVI)
 ```
 
@@ -163,7 +169,7 @@ This demonstrates the effectiveness of the new transformation: it has normalised
  
  
 
-# Results
+# Aggregation Options
 
 Our first view of the results is as a results table. The table is sorted by default from the highest scoring (most vulnerable) municipalities downwards, based on the Index scores for different scenario.
 
@@ -425,7 +431,9 @@ f_plot_map(coin = MVI4,
 
 # Uncertainty Analysis
 
+Uncertainty analysis involves estimating the uncertainty in the the scores and ranks of the composite indicator, given the uncertainties in the methodological alternatives for the aggregation approach. 
 
+The results of an uncertainty include for example confidence intervals over the ranks and median ranks.
 
 
 # Field experts "Reality Check" 
