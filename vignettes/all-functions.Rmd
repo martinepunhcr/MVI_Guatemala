@@ -597,7 +597,10 @@ f_export_to_excel(coin = MVI,
   
 
 ```{r example-f_export_report}
-f_export_report()
+# f_export_report(  datafolder = "data-raw", ## This is the default folder where to put you data in
+#                   data = "data_module-input.xlsx", ## Name of the data file
+#                  shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", ## name of the shapefile to create the map
+#                  folder = "Report")
 ```
 
   

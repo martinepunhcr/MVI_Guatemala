@@ -126,6 +126,11 @@ f_data_input <- function(file_path){
     message("Removed dimensions containing no categories: ", no_children_2,
             paste0(no_children_2, collapse = ", "))
   }
+  ## Catch issues on duplicated icode
+  t <- as.data.frame(table(iMeta$iCode))  |>
+       dplyr::filter(Freq > 1) |>
+       dplyr::pull(Var1)
+  if ( length(t) >0 ) { cat ( paste0(t, " is duplicated within your variable name. \n" ))} else {cat ()}
 
 
   # Build coin and output ----

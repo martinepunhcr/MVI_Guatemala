@@ -223,6 +223,11 @@ f_data_input <- function(file_path){
     message("Removed dimensions containing no categories: ", no_children_2,
             paste0(no_children_2, collapse = ", "))
   }
+  ## Catch issues on duplicated icode
+  t <- as.data.frame(table(iMeta$iCode))  |>
+       dplyr::filter(Freq > 1) |>
+       dplyr::pull(Var1)
+  if ( length(t) >0 ) { cat ( paste0(t, " is duplicated within your variable name. \n" ))} else {cat ()}
 
 
   # Build coin and output ----
@@ -954,9 +959,8 @@ test_that("a_bod works", {
 #' only has one column (to avoid errors in Compind).
 #' @param x A numeric vector
 #' 
-#' @noRd
 #' @export
-#' 
+
 a_wroclaw <- function(x){
   if(ncol(x) == 1){
     return(x[[1]])
@@ -1199,9 +1203,9 @@ test_that("f_display_results_table works", {
 #' 
 #' @param coin The coin
 #' @param dset Name of data set in the coin from which to extract the indicator/aggregate to plot
-#' @param iCode Code of indicator within `dset` to plot
-#' @param shp_path Assume a shapefile with ADM2_PCODE being the main key to use\
-#'                with thedefault admin2Pcode within the indicator main excel file
+#' @param iCode Code of indicator within `"dset"` to plot
+#' @param shp_path Assume a shapefile with `"ADM2_PCODE"` being the main key to use\
+#'                with the default `"admin2Pcode"` within the indicator main excel file
 #'                
 #'                 Guatemala example is currently at `"./inst/shp/gtm_admbnda_adm2_ocha_conred_20190207.shp"`
 #' 
@@ -1736,17 +1740,57 @@ test_that("f_export_to_excel works", {
 #   template_create_dir = TRUE
 # )
 #' 
-#' @return nothing a report is created...
+#' Generate an html technical report
 #' 
-#' @export
-f_export_report <- function(){
+#' This functions provides a quick access to a basic report to generate severity index 
+#' according multiple scenario
+#' 
+#' @param datafolder "data-raw" ## This is the default folder where to put you data in
+#' @param data "data_module-input.xlsx" ## Name of the data file
+#' @param shp "gtm_admbnda_adm2_ocha_conred_20190207.shp" ## name of the shapefile to create the map
+#' @param folder folder within your project where to put the generated report. 
+#' Folder will be created if it does not exist
+#' 
+#' @importFrom unhcrdown paged_simple
+#' @importFrom dplyr filter select pull
+#' @importFrom rmarkdown render
+#' @importFrom here here
+#' 
+#' @return nothing the file for the report is generated
+#' 
+#' @export 
+#'
+
+f_export_report <- function(datafolder,
+                            data,
+                            shp,
+                                   folder = "Report") {
   
-    
+  
+    datafolder: "data-raw" ## This is the default folder where to put you data in
+  data: "data_module-input.xlsx" ## Name of the data file
+  shp: "gtm_admbnda_adm2_ocha_conred_20190207.shp" ## name of the shapefile to create the map
+  
+  ## Create the outfolder if it does not exist
+  output_dir <- paste0(getwd(),"/",folder)
+  if (!dir.exists(output_dir)) {dir.create(output_dir)}
+   
+  
+  rmarkdown::render(
+    system.file("rmarkdown/templates/index_report/skeleton/skeleton.Rmd", package = "BuildIndex"),
+    output_file = here::here(folder, paste0('SeverityIndex_report-',   '.html') ),
+    params = list(datafolder = datafolder,
+                            data = data,
+                            shp = shp)  )
 }
+  
 ```
   
 ```{r example-f_export_report}
-f_export_report()
+# f_export_report(  datafolder = "data-raw", ## This is the default folder where to put you data in
+#                   data = "data_module-input.xlsx", ## Name of the data file
+#                  shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", ## name of the shapefile to create the map
+#                  folder = "Report")
 ```
   
 ```{r tests-f_export_report}

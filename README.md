@@ -1,6 +1,18 @@
 # {BuildIndex}
 
-An organized workflow  to build composite indicator
+An organized workflow to build __severity index__, aka a composite indicator in line with the commonly used tri-dimensional conceptual framework: 
+
+  1. Vulnerability / Living Standards 
+  
+  2. Exposure / Coping Mechanisms 
+  
+  3. Intensity / Physical and Mental Well being 
+  
+  
+The output generates different scenarios to be presented in a reality-check workshop to a local panel of non-data experts so that they can select the most appropriate one in relation with the context. 
+
+
+The approach generates Transparency, Robustness & Accuracy as it follows the standards [10 steps approach](https://knowledge4policy.ec.europa.eu/sites/default/files/10-step-pocket-guide-to-composite-indicators-and-scoreboards.pdf) in a reproducible approach  and ensure Credibility & Engagement through the effective participation of filed experts.
 
 ## Install  
 
@@ -11,9 +23,17 @@ pak::pkg_install("martinepunhcr/MVI_Guatemala")
 
 ## Use
 
-Once installed, you will get a predefined report template.
+Create a new project in Rstudio
 
-Adjust the parameter from the template to get your index based on your own data
+Create a new file > new R markdown > from template > index_report from {BuildIndex}
+
+In this file, adjust the parameters from the template to get your index based on your own data:
+
+ * __datafolder__: "data-raw" ## This is the default folder where to put you data in  
+ 
+ * __data__:  Name of the data excel (.xlsx) file  with the indicator main excel file - following precisely the template - see example [here](https://github.com/martinepunhcr/MVI_Guatemala/raw/main/data-raw/data_module-input.xlsx): one worksheet for the indicator and one worksheet for the documentation of aggregation  
+ 
+ * __shp__: name of the shapefile to create the map. The shapefile must include a default field named `"ADM2_PCODE"`, that will be used as the main key to join with  `"admin2Pcode"` within the indicator main excel file
 
 
 ## Next 
@@ -21,8 +41,8 @@ Adjust the parameter from the template to get your index based on your own data
 a shiny App will be created to ease the index building steps
 
 
-## Example: Municipal Vulnerability Index Guatemala
+## Example: Municipal Severity Index Guatemala
 
-UNHCR Guatemala is building a composite indicator to assess the vulnerability of the 340 municipalities in the country. The main purpose of the index is to better prioritize the municipalities in which UNHCR should do Community-based Protection interventions.
+UNHCR Guatemala is building a composite indicator to assess the Severity of the 340 municipalities in the country. The main purpose of the index is to better prioritize the municipalities in which UNHCR should do Community-based Protection interventions.
 
 There is an available https://github.com/martinepunhcr/MVI_Guatemala/wiki to review the metadata of all indicators used in the Index

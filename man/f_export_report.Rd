@@ -4,14 +4,33 @@
 \alias{f_export_report}
 \title{Title}
 \usage{
-f_export_report()
+f_export_report(datafolder, data, shp, folder = "Report")
+}
+\arguments{
+\item{datafolder}{"data-raw" ## This is the default folder where to put you data in}
+
+\item{data}{"data_module-input.xlsx" ## Name of the data file}
+
+\item{shp}{"gtm_admbnda_adm2_ocha_conred_20190207.shp" ## name of the shapefile to create the map}
+
+\item{folder}{folder within your project where to put the generated report. 
+Folder will be created if it does not exist}
 }
 \value{
-nothing a report is created...
+nothing the file for the report is generated
 }
 \description{
 Title
 }
+\details{
+Generate an html technical report
+
+This functions provides a quick access to a basic report to generate severity index 
+according multiple scenario
+}
 \examples{
-f_export_report()
+# f_export_report(  datafolder = "data-raw", ## This is the default folder where to put you data in
+#                   data = "data_module-input.xlsx", ## Name of the data file
+#                  shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", ## name of the shapefile to create the map
+#                  folder = "Report")
 }

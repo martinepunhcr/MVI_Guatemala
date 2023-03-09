@@ -14,8 +14,8 @@ params:
   max_winsorisation:  5
   skew_thresh:  2
   kurt_thresh: 3.5
-  same_thresh: 0.5,
-  collin_thresh: 0.9,
+  same_thresh: 0.5
+  collin_thresh: 0.9
   neg_corr_thresh: -0.4
 ---
 
@@ -88,10 +88,13 @@ We can see that most indicators have been dealt with by applying a log transform
 outlying_indicators <- MVI$Analysis$Treated$Dets_Table$iCode[!MVI$Analysis$Treated$Dets_Table$check_SkewKurt2.Pass] |>
   na.omit()
 
-COINr::plot_dist(MVI, 
+plot <- COINr::plot_dist(MVI, 
                  dset = "Treated", 
                  iCodes = outlying_indicators, 
-                 type = "Dot")
+                 type = "Dot") 
+plot <- plot + unhcrthemes::theme_unhcr()
+
+plot 
 ```
 
 This shows a problem: that one of the indicators is unusually negatively skewed. In this case, applying a log transformation won't work because that corrects for positive skew. To deal with this I have encoded a function in COINr which can deal with negative skew as well, and this is invoked here. In fact, it checks the direction of skew and applies the correct transformation.
@@ -99,22 +102,22 @@ This shows a problem: that one of the indicators is unusually negatively skewed.
 ```{r}
 MVI <- qTreat(MVI, 
               dset = "Raw", 
-              winmax = 5, 
-              skew_thresh = 2, 
-              kurt_thresh = 3.5, 
+              winmax = params$max_winsorisation, 
+              skew_thresh = params$skew_thresh , 
+              kurt_thresh = params$kurt_thresh, 
               f2 = "log_CT_plus")
 ```
 
-Now let's check the outcome. We just focus on "C.I.6" here which is the problematic indicator:
+Now let's check the outcome. We just focus on "AccElectr" here which is the problematic indicator:
 
 ```{r}
 p1 <- COINr::plot_dist(MVI, 
                        dset = "Treated", 
-                       iCodes = "C.I.6", 
+                       iCodes = "AccElectr", 
                        type = "Dot")
 p2 <- COINr::plot_scatter(MVI, 
                           dsets = c("Raw", "Treated"), 
-                          iCodes = "C.I.6")
+                          iCodes = "AccElectr")
 
 library(patchwork)
 p1 + p2
@@ -136,9 +139,9 @@ Our first view of the results is as a results table. The table is sorted by defa
 ```{r}
 MVI1 <- f_build_index(coin = MVI, 
                      agg_method = "a_amean", #   (arithmetic mean),
-                     max_winsorisation = 5,
-                     skew_thresh = 2,
-                     kurt_thresh = 3.5)
+                     max_winsorisation = params$max_winsorisation, 
+                     skew_thresh = params$skew_thresh , 
+                     kurt_thresh = params$kurt_thresh )
 ```
 
 
@@ -158,11 +161,11 @@ results_table |>
 These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. Here, since we have a lot of municipalities I will just plot the top thirty. They are coloured by departamento.
 
 ```{r}
-COINr::plot_bar(MVI1, 
-                dset = "Aggregated", 
-                iCode = "MVI", 
-               ##  by_group = "Departamento", 
-                filter_to_ends = list(top = 30))
+# COINr::plot_bar(MVI1, 
+#                 dset = "Aggregated", 
+#                 iCode = "MVI", 
+#                ##  by_group = "Departamento", 
+#                 filter_to_ends = list(top = 30))
 ```
 
 We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.
@@ -195,9 +198,9 @@ f_export_to_excel(coin = MVI1,
 ```{r}
 MVI2 <- f_build_index(coin = MVI, 
                      agg_method = "a_gmean", # (geometric mean),
-                     max_winsorisation = 5,
-                     skew_thresh = 2,
-                     kurt_thresh = 3.5)
+                     max_winsorisation = params$max_winsorisation, 
+                     skew_thresh = params$skew_thresh , 
+                     kurt_thresh = params$kurt_thresh )
 ```
 
 ```{r}
@@ -215,11 +218,11 @@ results_table |>
 These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. Here, since we have a lot of municipalities I will just plot the top thirty. They are coloured by departamento.
 
 ```{r}
-COINr::plot_bar(MVI2, 
-                dset = "Aggregated", 
-                iCode = "MVI", 
-               #  by_group = "Departamento", 
-                filter_to_ends = list(top = 30))
+# COINr::plot_bar(MVI2, 
+#                 dset = "Aggregated", 
+#                 iCode = "MVI", 
+#                #  by_group = "Departamento", 
+#                 filter_to_ends = list(top = 30))
 ```
 
 We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.
@@ -251,9 +254,9 @@ f_export_to_excel(coin = MVI2,
 ```{r}
 MVI3 <- f_build_index(coin = MVI, 
                      agg_method = "a_bod", # (benefit of doubt via Compind package) 
-                     max_winsorisation = 5,
-                     skew_thresh = 2,
-                     kurt_thresh = 3.5)
+                     max_winsorisation = params$max_winsorisation, 
+                     skew_thresh = params$skew_thresh , 
+                     kurt_thresh = params$kurt_thresh )
 ```
 
 
@@ -272,11 +275,11 @@ results_table |>
 These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. Here, since we have a lot of municipalities I will just plot the top thirty. They are coloured by departamento.
 
 ```{r}
-COINr::plot_bar(MVI3, 
-                dset = "Aggregated", 
-                iCode = "MVI", 
-               #  by_group = "Departamento", 
-                filter_to_ends = list(top = 30))
+# COINr::plot_bar(MVI3, 
+#                 dset = "Aggregated", 
+#                 iCode = "MVI", 
+#                #  by_group = "Departamento", 
+#                 filter_to_ends = list(top = 30))
 ```
 
 We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.
@@ -329,11 +332,11 @@ results_table |>
 These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. Here, since we have a lot of municipalities I will just plot the top thirty. They are coloured by departamento.
 
 ```{r}
-COINr::plot_bar(MVI4, 
-                dset = "Aggregated", 
-                iCode = "MVI", 
-               #  by_group = "Departamento", 
-                filter_to_ends = list(top = 30))
+# COINr::plot_bar(MVI4, 
+#                 dset = "Aggregated", 
+#                 iCode = "MVI", 
+#                #  by_group = "Departamento", 
+#                 filter_to_ends = list(top = 30))
 ```
 
 We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.

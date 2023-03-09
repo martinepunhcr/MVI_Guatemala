@@ -6,9 +6,8 @@
 #' only has one column (to avoid errors in Compind).
 #' @param x A numeric vector
 #' 
-#' @noRd
 #' @export
-#' 
+
 #' @examples
 #' #
 a_wroclaw <- function(x){

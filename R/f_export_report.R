@@ -11,12 +11,52 @@
 #   template_create_dir = TRUE
 # )
 #' 
-#' @return nothing a report is created...
+#' Generate an html technical report
 #' 
-#' @export
+#' This functions provides a quick access to a basic report to generate severity index 
+#' according multiple scenario
+#' 
+#' @param datafolder "data-raw" ## This is the default folder where to put you data in
+#' @param data "data_module-input.xlsx" ## Name of the data file
+#' @param shp "gtm_admbnda_adm2_ocha_conred_20190207.shp" ## name of the shapefile to create the map
+#' @param folder folder within your project where to put the generated report. 
+#' Folder will be created if it does not exist
+#' 
+#' @importFrom unhcrdown paged_simple
+#' @importFrom dplyr filter select pull
+#' @importFrom rmarkdown render
+#' @importFrom here here
+#' 
+#' @return nothing the file for the report is generated
+#' 
+#' @export 
+#'
+
 #' @examples
-#' f_export_report()
-f_export_report <- function(){
+#' # f_export_report(  datafolder = "data-raw", ## This is the default folder where to put you data in
+#' #                   data = "data_module-input.xlsx", ## Name of the data file
+#' #                  shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", ## name of the shapefile to create the map
+#' #                  folder = "Report")
+f_export_report <- function(datafolder,
+                            data,
+                            shp,
+                                   folder = "Report") {
   
-    
+  
+    datafolder: "data-raw" ## This is the default folder where to put you data in
+  data: "data_module-input.xlsx" ## Name of the data file
+  shp: "gtm_admbnda_adm2_ocha_conred_20190207.shp" ## name of the shapefile to create the map
+  
+  ## Create the outfolder if it does not exist
+  output_dir <- paste0(getwd(),"/",folder)
+  if (!dir.exists(output_dir)) {dir.create(output_dir)}
+   
+  
+  rmarkdown::render(
+    system.file("rmarkdown/templates/index_report/skeleton/skeleton.Rmd", package = "BuildIndex"),
+    output_file = here::here(folder, paste0('SeverityIndex_report-',   '.html') ),
+    params = list(datafolder = datafolder,
+                            data = data,
+                            shp = shp)  )
 }
+  

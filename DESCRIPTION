@@ -10,6 +10,8 @@ Authors@R: c(
 Maintainer: William Becker <william.becker@bluefoxdata.eu>
 Description: .
 License: MIT + file LICENSE
+URL: https://martinepunhcr.github.io/MVI_Guatemala/
+BugReports: https://github.com/martinepunhcr/MVI_Guatemala/issues
 Imports: 
     COINr,
     Compind,
@@ -24,18 +26,18 @@ Imports:
     readxl,
     rgdal,
     rlang,
+    rmarkdown,
     sf,
+    unhcrdown,
     utils
 Suggests: 
     knitr,
     pkgload,
-    rmarkdown,
     testthat
 VignetteBuilder: 
     knitr
 Remotes: 
-    vidonne/unhcrdown,
-    vidonne/unhcrthemes
+    vidonne/unhcrdown
 Encoding: UTF-8
 LazyData: TRUE
 RoxygenNote: 7.2.3

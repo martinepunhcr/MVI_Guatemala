@@ -11,10 +11,10 @@ f_plot_map(coin, dset = "Aggregated", iCode = "MVI", shp_path)
 
 \item{dset}{Name of data set in the coin from which to extract the indicator/aggregate to plot}
 
-\item{iCode}{Code of indicator within `dset` to plot}
+\item{iCode}{Code of indicator within `"dset"` to plot}
 
-\item{shp_path}{Assume a shapefile with ADM2_PCODE being the main key to use\
-with thedefault admin2Pcode within the indicator main excel file
+\item{shp_path}{Assume a shapefile with `"ADM2_PCODE"` being the main key to use\
+with the default `"admin2Pcode"` within the indicator main excel file
 
  Guatemala example is currently at `"./inst/shp/gtm_admbnda_adm2_ocha_conred_20190207.shp"`}
 }
