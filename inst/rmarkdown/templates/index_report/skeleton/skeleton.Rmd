@@ -211,11 +211,21 @@ These results should be checked to see whether they agree with common sense. Ano
 We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.
 
 ```{r}
-COINr::plot_bar(MVI1, 
+
+plotbar <- COINr::plot_bar(MVI1, 
                 dset = "Aggregated", 
                 iCode = "MVI", 
                 stack_children = TRUE, 
-                filter_to_ends = list(bottom = 30))
+              #  uLabel = "uName", ##--> Does not seems to work...   #  Error in codes2names(coin, iData$uCode) : 
+                                                                     # all(iCodes %in% iMeta$iCode) is not TRUE
+                  uLabel = "uCode",
+                filter_to_ends = list(bottom = 30)) 
+
+plotbar <- plotbar +
+  coord_flip()
+
+plotbar
+  
 ```
 
 As a last view of the results (for the moment), we can plot a choropleth map. This is based on the municipal shape files.
