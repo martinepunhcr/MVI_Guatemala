@@ -1,7 +1,7 @@
 ---
-title: "Index Building - technical documentation"
-author: "UNHCR"
-date: " `r format(Sys.Date(),  '%d %B %Y')`"
+title: "Severity Index Building"
+author: "Technical documentation - UNHCR"
+date: " `r format(Sys.Date(),  '%B %Y')`"
 output:
   unhcrdown::html_page:
     toc: true
@@ -49,26 +49,39 @@ shp_path = here::here(params$datafolder, params$shp)
 ```
 
 
-## Introduction
+# Introduction
 
-This document records the construction of the Index.  For convenience the main steps (Data treatment; Normalisation and Aggregation) have now been condensed down and simpliefied to a dedicated function:
+This document records the construction of the Index. 
 
 
-### Data treatment
+# Conceptual Framework
 
+Bsed on available indicators in the country, the conceptual framework can be represented in the diagramme below: 
+
+```{r}
+MVI <- f_data_input(file_path )
+f_plot_framework(MVI)
+```
+
+
+In details, the composite indicators can be described below:
+
+```{r}
+f_print_coin(MVI)
+```
+
+
+# Data treatment
+
+For convenience the main steps (Data treatment; Normalisation and Aggregation) have now been condensed down and simplified to a function that look at:
+ 
+ 
  * __Outlier treatment__ : Outlier treatment aims to adjust the distributions of highly skewed, or fat tailed indicators, including cases where there are outliers that are not characteristic of the rest of the distribution. This is done to improve the discriminatory power of the indicator in aggregation. For more on this, see [here](https://bluefoxr.github.io/COINrDoc/data-treatment.html).
 
  * __skew and kurtosis__ : If the absolute skew is greater than 2 AND the kurtosis is greater than 3.5, data treatment is applied (step 3 onwards), else leave the indicator as it is and move back to 1 for the next indicator.
 
  * __Winsorisation__ :  up to a maximum number of five points. Check after each Winsorised point whether skew and kurtosis fall back within the limits specified. If so, apply no further data treatment and move to the next indicator. If the maximum number of Winsorised points is reached and skew and kurtosis are still outside the thresholds, "undo" any Winsorised points and apply a log transformation.
 
-## Display index framework 
-
-```{r}
-MVI <- f_data_input(file_path )
-f_print_coin(MVI)
-f_plot_framework(MVI)
-```
 
 A number of indicators might require data treatment. To deal with this we follow a standard procedure is built as a default
  
@@ -76,10 +89,27 @@ A number of indicators might require data treatment. To deal with this we follow
 ```{r}
 MVI <- f_analyse_indicators(MVI)
 f_display_indicator_analysis(MVI)
+```
 
+Now Building the index
 
+```{r}
 MVI <- f_build_index(MVI)
-f_display_results_table(MVI)
+
+## Too many column to dislay
+f_display_results_table(MVI)  
+
+# results_table <- COINr::get_results(MVI, 
+#                                     dset = "Treated",
+#                              tab_type = "Summ",
+#                              also_get = "uName", 
+#                              nround = 1) 
+# 
+# results_table |>
+#   dplyr::select(1:7) |>
+#   DT::datatable() |>
+#   DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
+
 ```
 
 We can see that most indicators have been dealt with by applying a log transformation as expected, whereas a few have been Winsorised. In total, after treatment four indicators still fall outside the skew/kurtosis limits. We will check these visually:
@@ -129,12 +159,15 @@ This demonstrates the effectiveness of the new transformation: it has normalised
 
 
  * __Aggregate__ : Now we create aggregate levels by aggregating up to the index. Different options will be used and generated for further comparison by field experts
+ 
+ 
+ 
 
-## Results
+# Results
 
-Our first view of the results is as a results table. The table is sorted by default from the highest scoring (most vulnerable) municipalities downwards, based on the Index scores.
+Our first view of the results is as a results table. The table is sorted by default from the highest scoring (most vulnerable) municipalities downwards, based on the Index scores for different scenario.
 
-### Arithmetic mean
+## Scenario 1: Arithmetic mean
 
 ```{r}
 MVI1 <- f_build_index(coin = MVI, 
@@ -153,6 +186,7 @@ results_table <- COINr::get_results(MVI1, dset = "Aggregated",
                              nround = 1) 
 
 results_table |>
+  dplyr::select(1:7) |>
   DT::datatable() |>
   DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
 ```
@@ -193,7 +227,12 @@ f_export_to_excel(coin = MVI1,
 ```
 
 
-### Geometric mean
+## Scenario 2: Geometric mean
+
+
+One issue to address when aggregating indicators is related to the concept of compensability. Namely the question is to know to what extent can we accept that the high score of an indicator go to compensate the low score of another indicator?  
+
+Geometric aggregation allows to bypass the full compensability hypothesis.
 
 ```{r}
 MVI2 <- f_build_index(coin = MVI, 
@@ -210,6 +249,7 @@ results_table <- COINr::get_results(MVI2, dset = "Aggregated",
                              nround = 1) 
 
 results_table |>
+  dplyr::select(1:7) |>
   DT::datatable() |>
   DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
 ```
@@ -249,7 +289,18 @@ f_export_to_excel(coin = MVI2,
                   fname = here::here("inst", "index_export_geo.xlsx"))
 ```
 
-### benefit of doubt
+## Scenario 3: Benefit of the Doubt
+
+
+This method is the application of Data Envelopment Analysis (DEA) to the field of composite indicators. It was originally proposed by Melyn and Moesen (1991) to evaluate macroeconomic performance. ACAPS has prepared an excellent note on The use of data envelopment analysis to [calculate priority scores in needs assessments](https://www.acaps.org/sites/acaps/files/resources/files/the_use_of_data_envelopment_analysis_to_calculate_priority_scores_in_needs_assessments_july_2015.pdf).
+
+BoD approach offers several advantages:
+
+ *  Weights are endogenously determined by the observed performances and benchmark is not based on theoretical bounds, but it’s a linear combination of the observed best performances.
+
+ *  Principle is easy to communicate: since we are not sure about the right weights, we look for ”benefit of the doubt” weights (such that your overall relative performance index is as high as possible).
+
+
 
 ```{r}
 MVI3 <- f_build_index(coin = MVI, 
@@ -267,6 +318,7 @@ results_table <- COINr::get_results(MVI3, dset = "Aggregated",
                              nround = 1) 
 
 results_table |>
+  dplyr::select(1:7) |>
   DT::datatable() |>
   DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
 ```
@@ -306,7 +358,12 @@ f_plot_map(coin = MVI3,
 #                   fname = here::here("inst", "index_export_bod.xlsx"))
 ```
 
-### Wroclaw Taxonomic Method
+## Scenario 4: Dendric method
+
+Dendric method (also known as the Wroclaw Taxonomic Method ), originally developed at the University of Wroclaw, is based on the distance from a theoretical unit characterized by the best performance for all indicators considered.
+
+The final composite indicator is therefore based on the sum of euclidean distances from the ideal unit and normalized by a measure of variability of these distance (`mean + 2*std`).
+
 
 ```{r}
 MVI4 <- f_build_index(coin = MVI, 
@@ -324,6 +381,7 @@ results_table <- COINr::get_results(MVI4, dset = "Aggregated",
                              nround = 1) 
 
 results_table |>
+  dplyr::select(1:7) |>
   DT::datatable() |>
   DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
 ```
@@ -363,15 +421,22 @@ f_plot_map(coin = MVI4,
 #                   fname = here::here("inst", "index_export_wro.xlsx"))
 ```
 
-## Next steps 
 
 
-"reality check" of the results with the Country Panel Expert
+# Uncertainty Analysis
 
-Do the results options make sense to field experts?
 
-Are there any big gaps in terms of indicators measured? 
 
-Are there need to reshuffles of indicators/categorias ?
+
+# Field experts "Reality Check" 
+
+
+"Reality check" of the results with the Country Panel Expert can be facilitated as a last step: 
+
+ *  Do the results options make sense to field experts?
+
+ *  Are there any big gaps in terms of indicators measured? 
+
+ *  Are there need to reshuffles of indicators/categories ?
 
 
