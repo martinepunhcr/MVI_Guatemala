@@ -51,9 +51,11 @@ shp_path = here::here(params$datafolder, params$shp)
 
 # Introduction
 
-This document records the construction of the Severity Index in Guatemala. It generates Transparency, Robustness & Accuracy as it follows the standards [10 steps approach](https://knowledge4policy.ec.europa.eu/sites/default/files/10-step-pocket-guide-to-composite-indicators-and-scoreboards.pdf) in a reproducible approach, using [coinR package](https://bluefoxr.github.io/COINr/). 
+This document records the construction of the Severity Index.
 
-It also ensures Credibility & Engagement through the effective participation of field experts as the last stage of the process.
+To be able to reach, properly assess and understand local dynamics, vulnerabilities and capacities of the displaced and host populations alike, humanitarian organisations are increasingly using sub-national [Area Based Approach](https://www.humanitarianlibrary.org/collection/implementing-area-based-approaches). Area based approaches define “_an area, rather than a sector or target group, as a primary entry point_”. Such approach is particularly appropriate when residents in an affected area face complex, inter-related and multisectoral needs, resulting in risk of forced displacement. Severity index informs therfore comparison of needs across geographic areas.  The challenge is to summarize and condense the information of a plurality of underlying indicators into a single measure, in a way that accurately reflects the underlying concept.
+
+The approach used here generates Transparency, Robustness & Accuracy as it follows the standards [10 steps](https://knowledge4policy.ec.europa.eu/sites/default/files/10-step-pocket-guide-to-composite-indicators-and-scoreboards.pdf) in a fully reproducible approach, using [coinR package](https://bluefoxr.github.io/COINr/). It also ensures Credibility & Engagement through the effective participation of field experts as the last stage of the process.
 
 
 # Conceptual Framework
