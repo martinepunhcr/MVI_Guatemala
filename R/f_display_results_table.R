@@ -32,7 +32,7 @@ f_display_results_table <- function(coin, type = "scores"){
   }
 
   df_results |>
-    DT::datatable() |>
+    DT::datatable(options = list(scrollX = TRUE), rownames = FALSE) |>
     DT::formatStyle(columns = ncol(df_results),
                 fontSize = '50%')
     
