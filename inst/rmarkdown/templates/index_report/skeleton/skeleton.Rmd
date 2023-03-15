@@ -37,8 +37,19 @@ set.seed(1)
 extrafont::loadfonts(quiet=TRUE)
 library("ggplot2")
 library("unhcrthemes")
+
+# NOTE install dev version of COINr at
+# pak::pkg_install("bluefoxr/COINr")
 library("COINr")
+
+
+# pak::pkg_install("martinepunhcr/MVI_Guatemala") 
 library("BuildIndex")
+
+# NOTE install iCOINr at 
+# pak::pkg_install("bluefoxr/iCOINr")
+library("iCOINr")
+
 
 file_path = here::here(params$datafolder, params$data)
 shp_path = here::here(params$datafolder, params$shp) 
@@ -106,11 +117,8 @@ f_display_indicator_analysis(MVI)
 In the table, only indicators with at least one "flag" based on the criteria mentioned are listed. In order to dig further into the flagged indicators, we can plot individual distributions: this can show the nature of outliers that are flagged.
 
 ```{r}
-# NOTE install iCOINr at devtools::install_github("bluefoxr/iCOINr")
 
-library(iCOINr)
-
-iplot_dist(MVI, iCode = "Refugiados")
+iCOINr::iplot_dist(MVI, iCode = "Refugiados")
 ```
 
 To explore other indicators change `iCode` in the source code to the required indicator code. Note that outliers may point to an error, but are often simply a feature of the data. However it is important to check. In the next section, any distributions with outliers will be treated.

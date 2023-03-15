@@ -37,7 +37,9 @@ Suggests:
 VignetteBuilder: 
     knitr
 Remotes: 
-    vidonne/unhcrdown
+    vidonne/unhcrdown,
+    bluefoxr/COINr,
+    bluefoxr/iCOINr
 Encoding: UTF-8
 LazyData: TRUE
 RoxygenNote: 7.2.3
