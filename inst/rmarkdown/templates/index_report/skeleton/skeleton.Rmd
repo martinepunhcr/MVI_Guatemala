@@ -3,7 +3,7 @@ title: "Severity Index Building"
 author: "Technical documentation - UNHCR"
 date: " `r format(Sys.Date(),  '%B %Y')`"
 output:
-  unhcrdown::html_page:
+  html_document:
     toc: true
     toc_depth: 2
     toc_float: true 
@@ -48,29 +48,32 @@ shp_path = here::here(params$datafolder, params$shp)
 # file_path = system.file("data_input/gtm_admbnda_adm2_ocha_conred_20190207.shp", package = "BuildIndex")
 ```
 
-
 # Introduction
 
 This document records the construction of the Severity Index.
 
-To be able to reach, properly assess and understand local dynamics, vulnerabilities and capacities of the displaced and host populations alike, humanitarian organisations are increasingly using sub-national [Area Based Approach](https://www.humanitarianlibrary.org/collection/implementing-area-based-approaches). Area based approaches define “_an area, rather than a sector or target group, as a primary entry point_”. Such approach is particularly appropriate when residents in an affected area face complex, inter-related and multisectoral needs, resulting in risk of forced displacement. Severity index informs therfore comparison of needs across geographic areas.  The challenge is to summarize and condense the information of a plurality of underlying indicators into a single measure, in a way that accurately reflects the underlying concept.
+To be able to reach, properly assess and understand local dynamics, vulnerabilities and capacities of the displaced and host populations alike, humanitarian organisations are increasingly using sub-national [Area Based Approach](https://www.humanitarianlibrary.org/collection/implementing-area-based-approaches). Area based approaches define "*an area, rather than a sector or target group, as a primary entry point*". Such approach is particularly appropriate when residents in an affected area face complex, inter-related and multisectoral needs, resulting in risk of forced displacement. Severity index informs therfore comparison of needs across geographic areas. The challenge is to summarize and condense the information of a plurality of underlying indicators into a single measure, in a way that accurately reflects the underlying concept.
 
 The approach used here generates Transparency, Robustness & Accuracy as it follows the standards [10 steps](https://knowledge4policy.ec.europa.eu/sites/default/files/10-step-pocket-guide-to-composite-indicators-and-scoreboards.pdf) in a fully reproducible approach, using [coinR package](https://bluefoxr.github.io/COINr/). It also ensures Credibility & Engagement through the effective participation of field experts as the last stage of the process.
 
-
 # Conceptual Framework
 
-Based on available indicators in the country, the conceptual framework can be represented in the interactive diagram below.
+The "theoretical" conceptual framework of the Severity Index is defined as shown in the figure below [NOTE: to ensure this is the final version?]:
 
-You can click on the diagram to drill down the different elements of the index. 
+![Theoretical conceptual framework](Marco%20conceptual.png)
+
+However, based on the indicators available in the country and that have been used as the input here, the conceptual framework used in practice is shown in the interactive diagram below.
+
+You can click on the diagram to drill down the different elements of the index.
 
 ```{r}
 MVI <- f_data_input(file_path )
 f_plot_framework(MVI)
 ```
 
+This may differ from the theoretical version in cases where no indicators are available for certain categories or dimensions, in which case these are automatically removed.
 
-In details, the composite indicators can be described below:
+Some further details summarising the input data are given below. These should be checked to ensure they agree with expectations.
 
 ```{r}
 
@@ -78,98 +81,97 @@ In details, the composite indicators can be described below:
 f_print_coin(MVI)
 ```
 
+# Indicator analysis
 
-# Data treatment
+In this section indicators are analysed from a statistical perspective. Specifically the following analyses are run:
 
-For convenience the main steps (Data treatment; Normalisation and Aggregation) have now been condensed down and simplified to a function that look at:
- 
- 
- * __Outlier treatment__ : Outlier treatment aims to adjust the distributions of highly skewed, or fat tailed indicators, including cases where there are outliers that are not characteristic of the rest of the distribution. This is done to improve the discriminatory power of the indicator in aggregation. For more on this, see [here](https://bluefoxr.github.io/COINrDoc/data-treatment.html).
+1. Univariate analysis based on data availability, uniqueness, and distribution properties.
+2. Bivariate analysis based on correlations.
 
- * __skew and kurtosis__ : If the absolute skew is greater than 2 AND the kurtosis is greater than 3.5, data treatment is applied (step 3 onwards), else leave the indicator as it is and move back to 1 for the next indicator.
+This is automated in a single function which flags any indicators that have "problems", based on the following criteria:
 
- * __Winsorisation__ :  up to a maximum number of five points. Check after each Winsorised point whether skew and kurtosis fall back within the limits specified. If so, apply no further data treatment and move to the next indicator. If the maximum number of Winsorised points is reached and skew and kurtosis are still outside the thresholds, "undo" any Winsorised points and apply a log transformation.
+- Percentage missing data (indicators flagged with less than 66%)
+- Percentage unique values (any indicators with greater than 50% observations with the same value are flagged)
+- Presence of outliers, flagged by having both absolute skew > 2 and kurtosis > 3.5
+- Collinearity with other indicators in the same aggregation group (defined as a rank correlation > 0.9)
+- Strong negative correlation with other indicators in the same group (defined as a rank correlation < -0.4)
 
-
-A number of indicators might require data treatment. To deal with this we follow a standard procedure is built as a default
- 
+Running the analysis generates the following table:
 
 ```{r}
 MVI <- f_analyse_indicators(MVI)
 f_display_indicator_analysis(MVI)
 ```
 
-Now Building the index
+In the table, only indicators with at least one "flag" based on the criteria mentioned are listed. In order to dig further into the flagged indicators, we can plot individual distributions: this can show the nature of outliers that are flagged.
+
+```{r}
+# NOTE install iCOINr at devtools::install_github("bluefoxr/iCOINr")
+
+library(iCOINr)
+
+iplot_dist(MVI, iCode = "Refugiados")
+```
+
+To explore other indicators change `iCode` in the source code to the required indicator code. Note that outliers may point to an error, but are often simply a feature of the data. However it is important to check. In the next section, any distributions with outliers will be treated.
+
+Similarly we can explore the relationships between indicators using scatter plots, and this helps to check any collinear or negatively-correlated indicators as flagged in the table.
+
+```{r}
+plot_scatter(MVI, dsets = "Raw", iCodes = c("Dormitoria", "VivCollectCalle"),
+             log_scale = c(FALSE, TRUE)) + 
+  theme(text = element_text(size = 25))
+```
+
+Again, this plot can be changed by changing the indicator codes.
+
+If any indicators are highly problematic (e.g. multiple flags and/or very low data availability) they can be considered for removal using the `f_remove_indicators()` function.
+
+# Index construction
+
+In order to build the index from this point, we follow three steps:
+
+1. Outlier treatment
+2. Normalisation
+3. Aggregation
+
+In practice this is performed by a single dedicated function `f_build_index()`. Here, the steps followed inside this function are broken down.
+
+**Outlier treatment** aims to adjust the distributions of highly skewed, or fat tailed indicators, including cases where there are outliers that are not characteristic of the rest of the distribution. This is done to improve the discriminatory power of the indicator in aggregation. For more on this, see [here](https://bluefoxr.github.io/COINrDoc/data-treatment.html).
+
+To deal with this we follow a standard procedure which looks like this, for each indicator:
+
+1. Check the **skew and kurtosis** of the indicator
+2. If the absolute skew is greater than 2 AND the kurtosis is greater than 3.5, data treatment is applied (step 3 onwards), else leave the indicator as it is and move back to 1 for the next indicator.
+3. Apply **Winsorisation** up to a maximum number of five points. Check after each Winsorised point whether skew and kurtosis fall back within the limits specified. If so, apply no further data treatment and move to the next indicator.
+4. If the maximum number of Winsorised points is reached and skew and kurtosis are still outside the thresholds, "undo" any Winsorised points and apply a log transformation.
+
+Running `f_build_index()` performs this outlier treatment procedure automatically to all indicators (any without outliers are skipped).
 
 ```{r}
 MVI <- f_build_index(MVI)
-
-## Too many column to dislay
-f_display_results_table(MVI)  
-
-# results_table <- COINr::get_results(MVI, 
-#                                     dset = "Treated",
-#                              tab_type = "Summ",
-#                              also_get = "uName", 
-#                              nround = 1) 
-# 
-# results_table |>
-#   dplyr::select(1:7) |>
-#   DT::datatable() |>
-#   DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
-
 ```
 
-We can see that most indicators have been dealt with by applying a log transformation as expected, whereas a few have been Winsorised. In total, after treatment four indicators still fall outside the skew/kurtosis limits. We will check these visually:
+The details of how each indicator was treated are shown in the following table.
 
 ```{r}
-outlying_indicators <- MVI$Analysis$Treated$Dets_Table$iCode[!MVI$Analysis$Treated$Dets_Table$check_SkewKurt2.Pass] |>
-  na.omit()
+source(here::here("R/old","helpers.R")) |>
+  suppressMessages()
 
-plot <- COINr::plot_dist(MVI, 
-                 dset = "Treated", 
-                 iCodes = outlying_indicators, 
-                 type = "Dot") 
-plot <- plot + unhcrthemes::theme_unhcr()
-
-plot 
+MVI$Analysis$Treated$Dets_Table |>
+  tidy_treatment_details() |>
+  filter(!Pass_0) |>
+  DT::datatable(rownames = FALSE)
 ```
 
-This shows a problem: that one of the indicators is unusually negatively skewed. In this case, applying a log transformation won't work because that corrects for positive skew. To deal with this I have encoded a function in COINr which can deal with negative skew as well, and this is invoked here. In fact, it checks the direction of skew and applies the correct transformation.
+The next step in the construction process is to **normalise** the indicators. This is done by transforming each indicator onto a $[1,100]$ scale using a "min-max" transformation. The objective is to put indicators on the same scale for the purposes of balanced aggregation. This is a linear transformation as illustrated by a before/after plot of any given indicator:
 
 ```{r}
-MVI <- qTreat(MVI, 
-              dset = "Raw", 
-              winmax = params$max_winsorisation, 
-              skew_thresh = params$skew_thresh , 
-              kurt_thresh = params$kurt_thresh, 
-              f2 = "log_CT_plus")
+plot_scatter(MVI, dsets = c("Treated", "Normalised"), iCodes = "InsegAlim") + 
+  theme(text = element_text(size = 25))
 ```
 
-Now let's check the outcome. We just focus on "AccElectr" here which is the problematic indicator:
-
-```{r}
-p1 <- COINr::plot_dist(MVI, 
-                       dset = "Treated", 
-                       iCodes = "AccElectr", 
-                       type = "Dot")
-p2 <- COINr::plot_scatter(MVI, 
-                          dsets = c("Raw", "Treated"), 
-                          iCodes = "AccElectr")
-
-library(patchwork)
-p1 + p2
-```
-
-This demonstrates the effectiveness of the new transformation: it has normalised the indicator but retaining its ordering. The scale of the indicator is now different (as with all transformations) but this is not important since indicators will anyway be scaled between 0-100 in the following step, and the scaling and transformation is only for the purposes of aggregation. When presenting individual indicators, we will of course present the real data.
-
- * __Normalise__ : Following this we can normalise the indicators using a standard per default min-max approach. This scales each indicator onto the $[0,100]$ interval.
-
-
- * __Aggregate__ : Now we create aggregate levels by aggregating up to the index. Different options will be used and generated for further comparison by field experts
- 
- 
- 
+The final operation is to aggregate the indicators. In this document we consider several alternative aggregation methods representing various "scenarios" for further comparison by field experts. Therefore, details of each aggregation method are left until the following section. Note that the choice of which aggregation methods to include here is still up for discussion.
 
 # Aggregation Options
 
@@ -185,8 +187,6 @@ MVI1 <- f_build_index(coin = MVI,
                      kurt_thresh = params$kurt_thresh )
 ```
 
-
-
 ```{r}
 results_table <- COINr::get_results(MVI1, dset = "Aggregated",
                              tab_type = "Aggs",
@@ -199,38 +199,25 @@ results_table |>
   DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
 ```
 
-
-These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. Here, since we have a lot of municipalities I will just plot the top thirty. They are coloured by departamento.
-
-```{r}
-# COINr::plot_bar(MVI1, 
-#                 dset = "Aggregated", 
-#                 iCode = "MVI", 
-#                ##  by_group = "Departamento", 
-#                 filter_to_ends = list(top = 30))
-```
-
-We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.
+These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. The colours within each bar represent the contributions to the index score from each Dimension. This bar chart shows the top 30 most vulnerable municipalities.
 
 ```{r}
+# note: install latest version of COINr
 
 plotbar <- COINr::plot_bar(MVI1, 
                 dset = "Aggregated", 
                 iCode = "MVI", 
                 stack_children = TRUE, 
-              #  uLabel = "uName", ##--> Does not seems to work...   #  Error in codes2names(coin, iData$uCode) : 
-                                                                     # all(iCodes %in% iMeta$iCode) is not TRUE
-                  uLabel = "uCode",
-                filter_to_ends = list(bottom = 30)) 
+                uLabel = "uName", ##--> Does not seems to work...   #  Error in codes2names(coin, iData$uCode) : 
+                                  ## see comment above              # all(iCodes %in% iMeta$iCode) is not TRUE
+                  #uLabel = "uCode",
+                filter_to_ends = list(top = 30), flip_coords = TRUE) 
 
-plotbar <- plotbar +
-  coord_flip()
-
-plotbar
+plotbar + theme(text = element_text(size = 25))
   
 ```
 
-As a last view of the results (for the moment), we can plot a choropleth map. This is based on the municipal shape files.
+The final view of the results is as a choropleth map.
 
 ```{r}
 f_plot_map(coin = MVI1, 
@@ -244,13 +231,9 @@ f_export_to_excel(coin = MVI1,
                   fname = here::here("inst", "index_export_artih.xlsx"))
 ```
 
-
 ## Scenario 2: Geometric mean
 
-
-One issue to address when aggregating indicators is related to the concept of compensability. Namely the question is to know to what extent can we accept that the high score of an indicator go to compensate the low score of another indicator?  
-
-Geometric aggregation allows to bypass the full compensability hypothesis.
+One issue to address when aggregating indicators is related to the concept of compensability. Namely the question is to know to what extent can we accept that the high score of an indicator should compensate the low score of another indicator? While the arithmetic mean has "perfect compensability", the geometric mean only allows [partial compensation](https://en.wikipedia.org/wiki/Inequality_of_arithmetic_and_geometric_means) between indicator scores.
 
 ```{r}
 MVI2 <- f_build_index(coin = MVI, 
@@ -272,28 +255,19 @@ results_table |>
   DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
 ```
 
-
-These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. Here, since we have a lot of municipalities I will just plot the top thirty. They are coloured by departamento.
-
-```{r}
-# COINr::plot_bar(MVI2, 
-#                 dset = "Aggregated", 
-#                 iCode = "MVI", 
-#                #  by_group = "Departamento", 
-#                 filter_to_ends = list(top = 30))
-```
-
-We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.
+Again the top 30 municipalities in this scenario:
 
 ```{r}
 COINr::plot_bar(MVI2, 
                 dset = "Aggregated", 
                 iCode = "MVI", 
-                stack_children = TRUE, 
-                filter_to_ends = list(bottom = 30))
+                stack_children = TRUE,
+                uLabel = "uName",
+                filter_to_ends = list(top = 30), flip_coords = TRUE) + 
+  theme(text = element_text(size = 25))
 ```
 
-As a last view of the results (for the moment), we can plot a choropleth map. This is based on the municipal shape files.
+The map:
 
 ```{r}
 f_plot_map(coin = MVI2, 
@@ -309,16 +283,13 @@ f_export_to_excel(coin = MVI2,
 
 ## Scenario 3: Benefit of the Doubt
 
-
 This method is the application of Data Envelopment Analysis (DEA) to the field of composite indicators. It was originally proposed by Melyn and Moesen (1991) to evaluate macroeconomic performance. ACAPS has prepared an excellent note on The use of data envelopment analysis to [calculate priority scores in needs assessments](https://www.acaps.org/sites/acaps/files/resources/files/the_use_of_data_envelopment_analysis_to_calculate_priority_scores_in_needs_assessments_july_2015.pdf).
 
 BoD approach offers several advantages:
 
- *  Weights are endogenously determined by the observed performances and benchmark is not based on theoretical bounds, but it’s a linear combination of the observed best performances.
+-   Weights are endogenously determined by the observed performances and benchmark is not based on theoretical bounds, but it's a linear combination of the observed best performances.
 
- *  Principle is easy to communicate: since we are not sure about the right weights, we look for ”benefit of the doubt” weights (such that your overall relative performance index is as high as possible).
-
-
+-   Principle is easy to communicate: since we are not sure about the right weights, we look for "benefit of the doubt" weights (such that your overall relative performance index is as high as possible).
 
 ```{r}
 MVI3 <- f_build_index(coin = MVI, 
@@ -327,7 +298,6 @@ MVI3 <- f_build_index(coin = MVI,
                      skew_thresh = params$skew_thresh , 
                      kurt_thresh = params$kurt_thresh )
 ```
-
 
 ```{r}
 results_table <- COINr::get_results(MVI3, dset = "Aggregated",
@@ -341,28 +311,19 @@ results_table |>
   DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
 ```
 
-
-These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. Here, since we have a lot of municipalities I will just plot the top thirty. They are coloured by departamento.
-
-```{r}
-# COINr::plot_bar(MVI3, 
-#                 dset = "Aggregated", 
-#                 iCode = "MVI", 
-#                #  by_group = "Departamento", 
-#                 filter_to_ends = list(top = 30))
-```
-
-We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.
+Again the top 30 municipalities in this scenario:
 
 ```{r}
 COINr::plot_bar(MVI3, 
                 dset = "Aggregated", 
                 iCode = "MVI", 
-                stack_children = TRUE, 
-                filter_to_ends = list(bottom = 30))
+                stack_children = TRUE,
+                uLabel = "uName",
+                filter_to_ends = list(top = 30), flip_coords = TRUE) + 
+  theme(text = element_text(size = 25))
 ```
 
-As a last view of the results (for the moment), we can plot a choropleth map. This is based on the municipal shape files.
+The map:
 
 ```{r}
 f_plot_map(coin = MVI3, 
@@ -371,9 +332,9 @@ f_plot_map(coin = MVI3,
            shp_path  )
 ```
 
-```{r}
-# f_export_to_excel(coin = MVI3, 
-#                   fname = here::here("inst", "index_export_bod.xlsx"))
+```{r, eval=FALSE}
+f_export_to_excel(coin = MVI3, 
+                  fname = here::here("inst", "index_export_bod.xlsx"))
 ```
 
 ## Scenario 4: Dendric method
@@ -381,7 +342,6 @@ f_plot_map(coin = MVI3,
 Dendric method (also known as the Wroclaw Taxonomic Method ), originally developed at the University of Wroclaw, is based on the distance from a theoretical unit characterized by the best performance for all indicators considered.
 
 The final composite indicator is therefore based on the sum of euclidean distances from the ideal unit and normalized by a measure of variability of these distance (`mean + 2*std`).
-
 
 ```{r}
 MVI4 <- f_build_index(coin = MVI, 
@@ -404,28 +364,19 @@ results_table |>
   DT::formatStyle(columns = ncol(results_table), fontSize = '50%')
 ```
 
-
-These results should be checked to see whether they agree with common sense. Another way of looking at the results is in a bar chart. Here, since we have a lot of municipalities I will just plot the top thirty. They are coloured by departamento.
-
-```{r}
-# COINr::plot_bar(MVI4, 
-#                 dset = "Aggregated", 
-#                 iCode = "MVI", 
-#                #  by_group = "Departamento", 
-#                 filter_to_ends = list(top = 30))
-```
-
-We can plot the same chart but broken down by Dimension scores - this can give a view of how much each dimension contributes to the total score.
+Again the top 30 municipalities in this scenario:
 
 ```{r}
 COINr::plot_bar(MVI4, 
                 dset = "Aggregated", 
                 iCode = "MVI", 
-                stack_children = TRUE, 
-                filter_to_ends = list(bottom = 30))
+                stack_children = TRUE,
+                uLabel = "uName",
+                filter_to_ends = list(top = 30), flip_coords = TRUE) + 
+  theme(text = element_text(size = 25))
 ```
 
-As a last view of the results (for the moment), we can plot a choropleth map. This is based on the municipal shape files.
+The map:
 
 ```{r}
 f_plot_map(coin = MVI4, 
@@ -434,29 +385,132 @@ f_plot_map(coin = MVI4,
            shp_path  )
 ```
 
-```{r}
-# f_export_to_excel(coin = MVI4, 
-#                   fname = here::here("inst", "index_export_wro.xlsx"))
+```{r, eval=FALSE}
+f_export_to_excel(coin = MVI4, 
+                  fname = here::here("inst", "index_export_wro.xlsx"))
 ```
 
+# Comparison
 
+We can compare the aggregation options as follows:
+
+```{r}
+df_compare <- COINr::compare_coins_multi(
+  list(
+    Arithmetic = MVI1,
+    Geometric = MVI2,
+    BOD = MVI3,
+    Wroclaw = MVI4),
+  dset = "Aggregated",
+  iCode = "MVI",
+  also_get = "uName"
+)
+
+DT::datatable(df_compare, rownames = F)
+```
+
+We can also plot any of the ranks of one result against another. For example: the arithmetic mean against the geometric mean.
+
+```{r}
+ggplot2::qplot(df_compare$Arithmetic, df_compare$Geometric,
+               xlab = "Arithmetic", ylab = "Geometric")  + 
+  theme(text = element_text(size = 25))
+```
+
+This demonstrates in this case the fairly large difference between the two methodologies.
 
 # Uncertainty Analysis
 
-Uncertainty analysis involves estimating the uncertainty in the the scores and ranks of the composite indicator, given the uncertainties in the methodological alternatives for the aggregation approach. 
+Uncertainty analysis involves estimating the uncertainty in the the scores and ranks of the composite indicator, given the uncertainties in the methodological alternatives for the aggregation approach.
 
 The results of an uncertainty include for example confidence intervals over the ranks and median ranks.
 
+Here we will perform an uncertainty analysis which tests the effect of changing the aggregation method, and the weights. To do this we read in some weight sets from a spreadsheet that represent plausible alternatives. These are added to the "coin" and can be accessed during aggregation.
 
-# Field experts "Reality Check" 
+```{r}
+library(readxl)
+
+w_base <- MVI$Meta$Weights$Original
+w_base <- w_base[w_base$Level == 1, ]
+
+f_path <- here::here("inst", "data_input", "weights.xlsx")
+# get names of tabs
+w_names <- excel_sheets(f_path)
 
 
-"Reality check" of the results with the Country Panel Expert can be facilitated as a last step: 
+for(w_name in w_names){
+  w <- read_excel(here::here("inst", "data_input", "weights.xlsx"), sheet = w_name) |>
+    as.data.frame()
+  # bind with indicator level
+  w <- rbind(w[names(w_base)], w_base)
+  # ensure any unused aggs removed
+  w <- w[w$iCode %in% MVI$Meta$Ind$iCode, ]
+  # add to coin
+  MVI$Meta$Weights[[w_name]] <- w
+}
 
- *  Do the results options make sense to field experts?
 
- *  Are there any big gaps in terms of indicators measured? 
+```
 
- *  Are there need to reshuffles of indicators/categories ?
+We can now build the specifications for the uncertainty analysis.
 
+```{r}
+# component of SA_specs for weights
+l_weights <- list(Address = "$Log$Aggregate$w",
+                  Distribution = names(MVI$Meta$Weights),
+                  Type = "discrete")
 
+# component for aggregation
+l_agg <- list(Address = "$Log$Aggregate$f_ag",
+               Distribution = c("a_amean", "a_gmean"),
+               Type = "discrete")
+
+# create overall specification list
+SA_specs <- list(
+  Weights = l_weights,
+  Aggregation = l_agg
+)
+```
+
+Now we run the uncertainty analysis. Since this involves regenerating the results many times, it can take some time. Set `N` to a lower value to make this faster (but less accurate).
+
+```{r}
+SA_res <- get_sensitivity(MVI, SA_specs = SA_specs, N = 50, SA_type = "SA",
+                          dset = "Aggregated", iCode = "MVI", Nboot = 100, check_addresses = FALSE)
+```
+
+Now we can plot the results. First, the uncertainty:
+
+```{r}
+plot_uncertainty(SA_res) + theme(
+  axis.text.x = element_blank(),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank()) + 
+  theme(text = element_text(size = 25))
+```
+
+Here the vertical lines represent 90% confidence intervals for the rank of each unit based on the range of ranks observed due to the different combinations of weights and aggregation methods. It demonstrates that the range of uncertainty is quite wide. To investigate further, we can check the relative importance of the two assumptions via a sensitivity analysis:
+
+```{r}
+plot_sensitivity(SA_res, ptype = "box") + 
+  theme(text = element_text(size = 25))
+```
+
+This shows that the aggregation method is the most important assumption here. However it is also true that the weight sets are rather different from one another.
+
+The outcome is that the level of uncertainty is fairy high. However, this is quite typical when changing between arithmetic and geometric mean. It points to the need to ideally decide whether the concept of "severity" is better dealt with by the arithmetic mean or the geometric mean, because the choice is important. Notably, this analysis excludes the other two aggregation methods which would further inflate the uncertainty.
+
+# Field experts "Reality Check"
+
+Composite indicators try to capture complex multidimensional socioeconomic concepts in a single measure. Inevitably this involves making a number of assumptions in the construction process, and this introduces uncertainties.
+
+As with any model, composite indicators should be validated if at all possible. In composite indicators, an important "validation" step is for field experts to carefully check the results to see to what extent they agree with intuition and experience. If the results seem unusual, it is important not to dismiss them but to try to understand why. Is the discrepancy due to the choice of methodology? Or the fact that some important indicators may be missing or not weighted strongly enough? Is the conceptual framework fit for purpose? Or, is this a genuine signal from the data that agrees with the concept and may be revealing something new to the experts? In short, it is important to explore the data carefully down to the indicator level, during the validation step, as opposed to looking only at the index level.
+
+To summarise, the "Reality check" of the results with the Country Panel Expert can include asking:
+
+- Do the results options make sense to field experts?
+- If the results don't make sense, why not?
+- Are there any big gaps in terms of indicators measured?
+- Are there need to reshuffles of indicators/categories?
+
+Generally speaking the objective is to improve the index, and to strike a balance between guiding the index towards the results you expect, without adjusting the methodology to only agree with prior assumptions. 
