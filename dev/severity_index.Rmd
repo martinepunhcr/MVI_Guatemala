@@ -613,6 +613,7 @@ test_that("f_analyse_indicators works", {
 #'          MVI$Analysis$Treated$Dets_Table
 #' 
 #' @importFrom COINr round_df
+#' @iportFrom dplyr rename
 #' 
 #' @return a summary table
 #' 

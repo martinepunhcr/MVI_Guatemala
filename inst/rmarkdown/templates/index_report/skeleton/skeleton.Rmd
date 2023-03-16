@@ -79,7 +79,7 @@ You can click on the diagram to drill down the different elements of the index.
 
 ```{r}
 MVI <- f_data_input(file_path )
-f_plot_framework(MVI)
+BuildIndex::f_plot_framework(MVI)
 ```
 
 This may differ from the theoretical version in cases where no indicators are available for certain categories or dimensions, in which case these are automatically removed.
@@ -89,7 +89,7 @@ Some further details summarising the input data are given below. These should be
 ```{r}
 
 ## it needs to come with a description of each column for proper understanding
-f_print_coin(MVI)
+BuildIndex::f_print_coin(MVI)
 ```
 
 # Indicator analysis
@@ -111,7 +111,7 @@ Running the analysis generates the following table:
 
 ```{r}
 MVI <- f_analyse_indicators(MVI)
-f_display_indicator_analysis(MVI)
+BuildIndex::f_display_indicator_analysis(MVI)
 ```
 
 In the table, only indicators with at least one "flag" based on the criteria mentioned are listed. In order to dig further into the flagged indicators, we can plot individual distributions: this can show the nature of outliers that are flagged.
@@ -157,15 +157,15 @@ To deal with this we follow a standard procedure which looks like this, for each
 Running `f_build_index()` performs this outlier treatment procedure automatically to all indicators (any without outliers are skipped).
 
 ```{r}
-MVI <- f_build_index(MVI)
+MVI <- BuildIndex::f_build_index(MVI)
 ```
 
 The details of how each indicator was treated are shown in the following table.
 
 ```{r}
 MVI$Analysis$Treated$Dets_Table |>
-  tidy_treatment_details() |>
-  filter(!Pass_0) |>
+  BuildIndex::tidy_treatment_details() |>
+  dplyr::filter( Pass_0 != TRUE) |>
   DT::datatable(rownames = FALSE)
 ```
 
@@ -185,7 +185,7 @@ Our first view of the results is as a results table. The table is sorted by defa
 ## Scenario 1: Arithmetic mean
 
 ```{r}
-MVI1 <- f_build_index(coin = MVI, 
+MVI1 <- BuildIndex::f_build_index(coin = MVI, 
                      agg_method = "a_amean", #   (arithmetic mean),
                      max_winsorisation = params$max_winsorisation, 
                      skew_thresh = params$skew_thresh , 
@@ -241,7 +241,7 @@ f_export_to_excel(coin = MVI1,
 One issue to address when aggregating indicators is related to the concept of compensability. Namely the question is to know to what extent can we accept that the high score of an indicator should compensate the low score of another indicator? While the arithmetic mean has "perfect compensability", the geometric mean only allows [partial compensation](https://en.wikipedia.org/wiki/Inequality_of_arithmetic_and_geometric_means) between indicator scores.
 
 ```{r}
-MVI2 <- f_build_index(coin = MVI, 
+MVI2 <- BuildIndex::f_build_index(coin = MVI, 
                      agg_method = "a_gmean", # (geometric mean),
                      max_winsorisation = params$max_winsorisation, 
                      skew_thresh = params$skew_thresh , 
@@ -297,7 +297,7 @@ BoD approach offers several advantages:
 -   Principle is easy to communicate: since we are not sure about the right weights, we look for "benefit of the doubt" weights (such that your overall relative performance index is as high as possible).
 
 ```{r}
-MVI3 <- f_build_index(coin = MVI, 
+MVI3 <- BuildIndex::f_build_index(coin = MVI, 
                      agg_method = "a_bod", # (benefit of doubt via Compind package) 
                      max_winsorisation = params$max_winsorisation, 
                      skew_thresh = params$skew_thresh , 
@@ -349,7 +349,7 @@ Dendric method (also known as the Wroclaw Taxonomic Method ), originally develop
 The final composite indicator is therefore based on the sum of euclidean distances from the ideal unit and normalized by a measure of variability of these distance (`mean + 2*std`).
 
 ```{r}
-MVI4 <- f_build_index(coin = MVI, 
+MVI4 <- BuildIndex::f_build_index(coin = MVI, 
                      agg_method = "a_wroclaw", # (Wroclaw Taxonomic Method via Compind)
                      max_winsorisation = 5,
                      skew_thresh = 2,
