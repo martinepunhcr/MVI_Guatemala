@@ -44,7 +44,7 @@ In this file, adjust the parameters from the template to get your index based on
 
 See work-in-progress [tecnical report here](articles/skeleton.html)
 
-__[to do]__ ShinyApp to deloy on  [rstudio.unhcr.org](https:://rstudio.unhcr.org) to further guide the data preparation and build the Technical Documentation Report without Rstudio
+__[to do]__ ShinyApp to deploy on  [rstudio.unhcr.org](https:://rstudio.unhcr.org) to further guide the data preparation and build the Technical Documentation Report without Rstudio
 
 ### 4. Field Expert Validation 
 

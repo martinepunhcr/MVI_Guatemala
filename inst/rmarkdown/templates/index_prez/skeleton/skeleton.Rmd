@@ -102,7 +102,7 @@ f_plot_framework(MVI)
 ```
 ]
 
---- 
+---
 
 ## Reality Check: Select a scenario
 
@@ -222,4 +222,6 @@ f_plot_map2(coin = MVI4,
 
 ---
 
-## Deliberation
+## Documentation of Deliberation
+
+> Provide here potential documentation of the elements that were shared to select one scenario rather than the other one
