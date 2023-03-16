@@ -24,7 +24,10 @@ pak::pkg_install("martinepunhcr/MVI_Guatemala")
 ```  
 
 ### 3. Create Project in Rstudio
-Create a new project in Rstudio. Then create a folder and put the required data file
+
+Create a github repository
+Create a new project in Rstudio from the git. 
+Then create a folder and put the required data file
 
  * __datafolder__: by default `"data-raw"` This is the default folder where to put you data in  
  
@@ -43,15 +46,15 @@ See work-in-progress [tecnical report here](articles/skeleton.html)
 
 __[to do]__ ShinyApp to deloy on  [rstudio.unhcr.org](https:://rstudio.unhcr.org) to further guide the data preparation and build the Technical Documentation Report without Rstudio
 
-### Field Expert Validation 
+### 4. Field Expert Validation 
 
 See an initial template for  [Field Expert Presentation here](articles/skeleton2.html)
 
-### Data Export
+### 5. Data Export
 
 See a sample of [Excel Data Export](https://github.com/martinepunhcr/MVI_Guatemala/raw/main/inst/index_export_geo.xlsx)
 
-### Interactive Exploration for Dissemination
+### 6. Interactive Exploration for Dissemination
 
 __[to do]__ function to build deployable ShinyApp visualisation on [rstudio.unhcr.org](https:://rstudio.unhcr.org)
 
