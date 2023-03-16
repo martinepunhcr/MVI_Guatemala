@@ -77,39 +77,59 @@
 <p>The output includes different scenarios to be presented through a <em>reality-check</em> workshop to a local panel of field experts so that they can select the most appropriate one in relation with the context.</p>
 <p>The approach generates Transparency, Robustness &amp; Accuracy as it follows the standards <a href="https://knowledge4policy.ec.europa.eu/sites/default/files/10-step-pocket-guide-to-composite-indicators-and-scoreboards.pdf" class="external-link">10 steps approach</a> in a reproducible approach, using <a href="https://bluefoxr.github.io/COINr/" class="external-link">coinR package</a>. It also ensures Credibility &amp; Engagement through the effective participation of field experts.</p>
 <div class="section level2">
-<h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
+<h2 id="how-to">How to?<a class="anchor" aria-label="anchor" href="#how-to"></a>
 </h2>
+<p>UNHCR Guatemala is building a composite indicator to assess the Severity of the 340 municipalities in the country. The main purpose of the index is to better prioritize the municipalities in which UNHCR should do Community-based Protection interventions. To reproduce the current, results:</p>
+<div class="section level3">
+<h3 id="id_1-source-sub-national-scale-data">1. Source sub-national scale data<a class="anchor" aria-label="anchor" href="#id_1-source-sub-national-scale-data"></a>
+</h3>
+<p>There is an available <a href="https://github.com/martinepunhcr/MVI_Guatemala/wiki" class="external-link uri">https://github.com/martinepunhcr/MVI_Guatemala/wiki</a> to review the metadata of all indicators used in the Index</p>
+</div>
+<div class="section level3">
+<h3 id="id_2-install">2. Install<a class="anchor" aria-label="anchor" href="#id_2-install"></a>
+</h3>
 <pre class="{r}"><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="http://pak.r-lib.org/reference/pkg_install.html" class="external-link">pkg_install</a></span><span class="op">(</span><span class="st">"martinepunhcr/MVI_Guatemala"</span><span class="op">)</span>  </span></code></pre>
 </div>
-<div class="section level2">
-<h2 id="use">Use<a class="anchor" aria-label="anchor" href="#use"></a>
-</h2>
-<p>Create a new project in Rstudio</p>
-<p>Create a new file &gt; new R markdown &gt; from template &gt; index_report from {BuildIndex}</p>
-<p>In this file, adjust the parameters from the template to get your index based on your own data:</p>
+<div class="section level3">
+<h3 id="id_3-create-project-in-rstudio">3. Create Project in Rstudio<a class="anchor" aria-label="anchor" href="#id_3-create-project-in-rstudio"></a>
+</h3>
+<p>Create a new project in Rstudio. Then create a folder and put the required data file</p>
 <ul>
 <li><p><strong>datafolder</strong>: by default <code>"data-raw"</code> This is the default folder where to put you data in</p></li>
 <li><p><strong>data</strong>: Name of the data excel (.xlsx) file with the indicator main excel file - following precisely a standard template - see example <a href="https://github.com/martinepunhcr/MVI_Guatemala/raw/main/data-raw/data_module-input.xlsx" class="external-link">here</a>: one worksheet for the indicator and one worksheet for the documentation of aggregation</p></li>
 <li><p><strong>shp</strong>: name of the shapefile to create the map. The shapefile must include a default field named <code>"ADM2_PCODE"</code>, that will be used as the main key to join with <code>"admin2Pcode"</code> within the indicator main excel file</p></li>
 </ul>
 </div>
-<div class="section level2">
-<h2 id="next">Next<a class="anchor" aria-label="anchor" href="#next"></a>
-</h2>
-<p>a shiny App will be created to ease the index building steps</p>
+<div class="section level3">
+<h3 id="id_4-technical-documentation-report">4. Technical Documentation Report<a class="anchor" aria-label="anchor" href="#id_4-technical-documentation-report"></a>
+</h3>
+<p>Whenever an index is being build, a key element of quality is related to documentation. The packge include a template to generate it.</p>
+<p>Create a new file &gt; new R markdown &gt; from template &gt; index_report from {BuildIndex}</p>
+<p>In this file, adjust the parameters from the template to get your index based on your own data:</p>
+<p>See work-in-progress <a href="articles/skeleton.html">tecnical report here</a></p>
+<p><strong>[to do]</strong> ShinyApp to deloy on <a href="https:://rstudio.unhcr.org">rstudio.unhcr.org</a> to further guide the data preparation and build the Technical Documentation Report without Rstudio</p>
 </div>
-<div class="section level2">
-<h2 id="example-municipal-severity-index-guatemala">Example: Municipal Severity Index Guatemala<a class="anchor" aria-label="anchor" href="#example-municipal-severity-index-guatemala"></a>
-</h2>
-<p>UNHCR Guatemala is building a composite indicator to assess the Severity of the 340 municipalities in the country. The main purpose of the index is to better prioritize the municipalities in which UNHCR should do Community-based Protection interventions.</p>
-<p>See work-in-progress <a href="articles/skeleton.html">tecnical report here</a> and <a href="articles/skeleton2.html">Field Expert Presentation here</a></p>
-<p>There is an available <a href="https://github.com/martinepunhcr/MVI_Guatemala/wiki" class="external-link uri">https://github.com/martinepunhcr/MVI_Guatemala/wiki</a> to review the metadata of all indicators used in the Index</p>
+<div class="section level3">
+<h3 id="field-expert-validation">Field Expert Validation<a class="anchor" aria-label="anchor" href="#field-expert-validation"></a>
+</h3>
+<p>See an initial template for <a href="articles/skeleton2.html">Field Expert Presentation here</a></p>
+</div>
+<div class="section level3">
+<h3 id="data-export">Data Export<a class="anchor" aria-label="anchor" href="#data-export"></a>
+</h3>
+<p>See a sample of <a href="https://github.com/martinepunhcr/MVI_Guatemala/raw/main/inst/index_export_geo.xlsx" class="external-link">Excel Data Export</a></p>
+</div>
+<div class="section level3">
+<h3 id="interactive-exploration-for-dissemination">Interactive Exploration for Dissemination<a class="anchor" aria-label="anchor" href="#interactive-exploration-for-dissemination"></a>
+</h3>
+<p><strong>[to do]</strong> function to build deployable ShinyApp visualisation on <a href="https:://rstudio.unhcr.org">rstudio.unhcr.org</a></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>
 </h2>
-<p>This project is supported technically by <a href="https://www.willbecker.me/" class="external-link">William Becker</a> and is funded through <a href="https://www.unhcr.org/innovation/innovation-fund/" class="external-link">UNHCR innovation fund</a>. It also benefited from the review of the <a href="https://www.unhcr.org/americas.html" class="external-link">Regional Bureau for the Americas based in Panama</a></p>
+<p>This project is led by <a href="https://www.unhcr.org/guatemala.html" class="external-link">UNNHCR Guatemala</a>, supported technically by <a href="https://www.willbecker.me/" class="external-link">William Becker</a> and funded through <a href="https://www.unhcr.org/innovation/innovation-fund/" class="external-link">UNHCR innovation fund</a>. It also benefited from the review of the <a href="https://www.unhcr.org/americas.html" class="external-link">Regional Bureau for the Americas based in Panama</a></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
