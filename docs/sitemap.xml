@@ -10,12 +10,6 @@
     <loc>/articles/index.html</loc>
   </url>
   <url>
-    <loc>/articles/skeleton.html</loc>
-  </url>
-  <url>
-    <loc>/articles/skeleton2.html</loc>
-  </url>
-  <url>
     <loc>/authors.html</loc>
   </url>
   <url>
@@ -88,6 +82,12 @@
     <loc>/reference/f_remove_indicators.html</loc>
   </url>
   <url>
+    <loc>/reference/get_solo_groups.html</loc>
+  </url>
+  <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/tidy_treatment_details.html</loc>
   </url>
 </urlset>

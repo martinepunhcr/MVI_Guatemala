@@ -68,6 +68,19 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="buildindex">{<a href="https://martinepunhcr.github.io/MVI_Guatemala/" class="external-link">BuildIndex</a>}<a class="anchor" aria-label="anchor" href="#buildindex"></a>
 </h1></div>
+<div class="section level2">
+<h2 id="problem-statement">Problem Statement<a class="anchor" aria-label="anchor" href="#problem-statement"></a>
+</h2>
+<p>To be able to reach, properly assess and understand local dynamics, vulnerabilities and capacities of the displaced and host populations alike, humanitarian organisations are increasingly using sub-national <a href="https://www.humanitarianlibrary.org/collection/implementing-area-based-approaches" class="external-link">Area Based Approach</a>. Area based approaches define “<em>an area, rather than a sector or target group, as a primary entry point</em>”. Such approach is particularly appropriate when residents in an affected area face complex, inter-related and multisectoral needs, resulting in risk of forced displacement. Severity index informs therefore comparison of needs across geographic areas. The challenge is to summarize and condense the information of a plurality of underlying indicators into a single measure, in a way that accurately reflects the underlying concept.</p>
+<p>However the calculation of Humanitarian Severity Index comes with challenges:</p>
+<blockquote>
+<p>“we end up relying on a lot of expert judgment, which in effect means that we’re faking it–we have a process and looks like it’s very rigorous, and in the end is just being done by people’s…assumptions.”</p>
+</blockquote>
+<p>Conceptual and statistical flaws during the creation of Humanitarian Severity Index can greatly limit its usefulness. <strong>While there are no magic formula to establish a sigle right way to calculte the index, there are definitely risks to make mistakes when selecting, treating and aggregating data</strong>. The main challenge is therefore to allow for a process that will be based on the expert judgement but framed within a set of aggregation options where people assumptions will be balanced by quantitative data properly selected and treated in a fully auditable way.</p>
+</div>
+<div class="section level2">
+<h2 id="solution-a-guide-workflow">Solution: a guide workflow<a class="anchor" aria-label="anchor" href="#solution-a-guide-workflow"></a>
+</h2>
 <p>An organized workflow to build <strong>severity index</strong>, aka a composite indicator in line with the commonly used tri-dimensional conceptual framework:</p>
 <ol style="list-style-type: decimal">
 <li><p>Vulnerability / Living Standards</p></li>
@@ -76,6 +89,10 @@
 </ol>
 <p>The output includes different scenarios to be presented through a <em>reality-check</em> workshop to a local panel of field experts so that they can select the most appropriate one in relation with the context.</p>
 <p>The approach generates Transparency, Robustness &amp; Accuracy as it follows the standards <a href="https://knowledge4policy.ec.europa.eu/sites/default/files/10-step-pocket-guide-to-composite-indicators-and-scoreboards.pdf" class="external-link">10 steps approach</a> in a reproducible approach, using <a href="https://bluefoxr.github.io/COINr/" class="external-link">coinR package</a>. It also ensures Credibility &amp; Engagement through the effective participation of field experts.</p>
+<blockquote>
+<p>Aid organisations and donors commit to… ’Dedicate resources and involve independent specialists within the clusters to strengthen [..] analysis in a fully transparent, collaborative process, which includes a brief summary of the methodological and analytical limitations of the assessment.” – Grand Bargain Commitment #5: <a href="https://interagencystandingcommittee.org/improve-joint-and-impartial-needs-assessments" class="external-link">Improve joint and impartial needs assessments</a></p>
+</blockquote>
+</div>
 <div class="section level2">
 <h2 id="how-to">How to?<a class="anchor" aria-label="anchor" href="#how-to"></a>
 </h2>
@@ -108,7 +125,7 @@
 <p>Create a new file &gt; new R markdown &gt; from template &gt; index_report from {BuildIndex}</p>
 <p>In this file, adjust the parameters from the template to get your index based on your own data:</p>
 <p>See work-in-progress <a href="articles/skeleton.html">tecnical report here</a></p>
-<p><strong>[to do]</strong> ShinyApp to deloy on <a href="https:://rstudio.unhcr.org">rstudio.unhcr.org</a> to further guide the data preparation and build the Technical Documentation Report without Rstudio</p>
+<p><strong>[to do]</strong> ShinyApp to deploy on <a href="https:://rstudio.unhcr.org">rstudio.unhcr.org</a> to further guide the data preparation and build the Technical Documentation Report without Rstudio</p>
 </div>
 <div class="section level3">
 <h3 id="id_4-field-expert-validation">4. Field Expert Validation<a class="anchor" aria-label="anchor" href="#id_4-field-expert-validation"></a>
