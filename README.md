@@ -1,4 +1,4 @@
-# {BuildIndex}
+# {[BuildIndex](https://martinepunhcr.github.io/MVI_Guatemala/)}
 
 An organized workflow to build __severity index__, aka a composite indicator in line with the commonly used tri-dimensional conceptual framework: 
 
@@ -45,6 +45,11 @@ a shiny App will be created to ease the index building steps
 
 UNHCR Guatemala is building a composite indicator to assess the Severity of the 340 municipalities in the country. The main purpose of the index is to better prioritize the municipalities in which UNHCR should do Community-based Protection interventions.
 
-See work-in-progress [here](articles/skeleton.html)
+See work-in-progress [tecnical report here](articles/skeleton.html) and  [Field Expert Presentation here](articles/skeleton2.html)
 
 There is an available https://github.com/martinepunhcr/MVI_Guatemala/wiki to review the metadata of all indicators used in the Index
+
+
+## Acknowledgement
+
+This project is supported technically by [William Becker](https://www.willbecker.me/) and is funded through [UNHCR innovation fund](https://www.unhcr.org/innovation/innovation-fund/). It also benefited from the review of the [Regional Bureau for the Americas based in Panama](https://www.unhcr.org/americas.html)

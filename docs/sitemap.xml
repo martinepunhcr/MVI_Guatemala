@@ -13,6 +13,9 @@
     <loc>/articles/skeleton.html</loc>
   </url>
   <url>
+    <loc>/articles/skeleton2.html</loc>
+  </url>
+  <url>
     <loc>/authors.html</loc>
   </url>
   <url>
@@ -46,6 +49,9 @@
     <loc>/reference/f_display_results_table.html</loc>
   </url>
   <url>
+    <loc>/reference/f_export_prez.html</loc>
+  </url>
+  <url>
     <loc>/reference/f_export_report.html</loc>
   </url>
   <url>
@@ -71,6 +77,9 @@
   </url>
   <url>
     <loc>/reference/f_plot_map.html</loc>
+  </url>
+  <url>
+    <loc>/reference/f_plot_map2.html</loc>
   </url>
   <url>
     <loc>/reference/f_print_coin.html</loc>

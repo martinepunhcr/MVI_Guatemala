@@ -457,6 +457,35 @@ f_plot_map(coin = MVI,
 
   
 
+## Plot map v2
+
+    
+
+  
+
+```{r example-f_plot_map2}
+MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
+                                            package = "BuildIndex") )
+
+MVI <- f_build_index(MVI)
+
+shp_path <-  system.file("data_input/gtm_admbnda_adm2_ocha_conred_20190207.shp",
+                                            package = "BuildIndex")
+
+shp_name <- "ADM2_ES"
+shp_ucode <- "ADM2_PCODE"
+
+f_plot_map2(coin = MVI, 
+           dset = "Aggregated",
+           shp_path = shp_path,
+           shp_name = shp_name,
+           shp_ucode = shp_ucode )
+## when using ut your shape in the folder ---
+         #  shp_path = here::here("inst/data-input", "gtm_admbnda_adm2_ocha_conred_20190207.shp")           )
+```
+
+  
+
       
 
 ## Generate results
@@ -606,7 +635,22 @@ f_export_to_excel(coin = MVI,
   
 
     
+
+## Generate technical prez
+
+    
+
   
+
+```{r example-f_export_prez}
+# f_export_prez(  datafolder = "data-raw", ## This is the default folder where to put you data in
+#                   data = "data_module-input.xlsx", ## Name of the data file
+#                  shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", ## name of the shapefile to create the map
+#                  folder = "Report")
+```
+
+  
+
   
   
 

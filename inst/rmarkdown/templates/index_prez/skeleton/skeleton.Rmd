@@ -1,0 +1,225 @@
+---
+title: "Severity Index Building"
+subtitle: "Field Expert presentation"
+author: " UNHCR"
+institute: "Operation Guatemala"
+date: "`r format(Sys.Date(),  '%d %B %Y')`"
+output:
+  unhcrdown::html_slides:
+    self_contained: true
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+params:
+  datafolder: "data-raw" ## This is the default folder where to put you data in
+  data: "data_module-input.xlsx" ## Name of the data file
+  shp: "gtm_admbnda_adm2_ocha_conred_20190207.shp" ## name of the shapefile to create the map
+  shp_name:  "ADM2_ES"
+  shp_ucode:  "ADM2_PCODE"
+  max_winsorisation:  5
+  skew_thresh:  2
+  kurt_thresh: 3.5
+  same_thresh: 0.5
+  collin_thresh: 0.9
+  neg_corr_thresh: -0.4
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  echo=FALSE,
+  fig.showtext = TRUE
+)
+library(tidyverse)
+library(unhcrthemes)
+library(fontawesome)
+
+# NOTE install dev version of COINr at
+# pak::pkg_install("bluefoxr/COINr")
+library("COINr")
+
+
+# pak::pkg_install("martinepunhcr/MVI_Guatemala") 
+library("BuildIndex")
+
+# NOTE install iCOINr at 
+# pak::pkg_install("bluefoxr/iCOINr")
+library("iCOINr")
+
+
+file_path = here::here(params$datafolder, params$data)
+shp_path = here::here(params$datafolder, params$shp) 
+```
+
+## Introduction
+ 
+To be able to reach, properly assess and understand local dynamics, vulnerabilities and capacities of the displaced and host populations alike, humanitarian organisations are increasingly using sub-national [Area Based Approach](https://www.humanitarianlibrary.org/collection/implementing-area-based-approaches). 
+
+Area based approaches define "*an area, rather than a sector or target group, as a primary entry point*". Such approach is particularly appropriate when residents in an affected area face complex, inter-related and multisectoral needs, resulting in risk of forced displacement. Severity index informs therfore comparison of needs across geographic areas. The challenge is to summarize and condense the information of a plurality of underlying indicators into a single measure, in a way that accurately reflects the underlying concept.
+
+The approach used here generates Transparency, Robustness & Accuracy as it follows the standards [10 steps](https://knowledge4policy.ec.europa.eu/sites/default/files/10-step-pocket-guide-to-composite-indicators-and-scoreboards.pdf) in a fully reproducible approach, using [coinR package](https://bluefoxr.github.io/COINr/). It also ensures Credibility & Engagement through the effective participation of field experts as the last stage of the process.
+
+
+---
+
+## Indicator Development
+
+Technical data experts in the country are responsible to identified and sourced available indicators for the country.
+
+At first each potential indicator is classified according the __tri-dimensionnal severity model__.  1. Vulnerability / Living Standards; 2. Exposure / Coping Mechanisms; 3. Intensity / Physical and Mental Well being 
+
+Then Technical data experts perform a series of assessment to ensure that the indicator can qualify to be integrated in the severity index: 
+
+ * treatment or removal of missing data, 
+ 
+ * Presence of outliers, 
+ 
+ * Co-linearity with other indicators in the same aggregation group,  
+ 
+ * Strong negative correlation with other indicators in the same group.
+
+The result of the initial data selection and treatment are documented and archived in an excel spreadsheet. A Summary is displayed in the next slide.
+
+---
+
+## Conceptual Framework
+
+
+.pull-left[
+  
+You can click on the diagram to drill down the different elements of the index
+]
+
+.pull-right[
+
+```{r }
+MVI <- f_data_input(file_path )
+f_plot_framework(MVI)
+```
+]
+
+--- 
+
+## Reality Check: Select a scenario
+
+Inevitably capturing complex multidimensional severity in a single measure involves making a number of assumptions in the construction process, and this introduces __uncertainties on which aggregation options should be retained__.
+
+As with any model, the selection of the final severity index formula should be validated by field experts to carefully check the results, aka to confirm to what extent which option matches the best with their intuition and experience. 
+
+If the results seem unusual, it is important not to dismiss them but to try to understand why. The "Reality check" of the results with the Country Panel Expert involves the review of different aggregation options to ask with a constructive critical mindset:
+
+ 1. Do the results options make sense with the reality of the field?  
+ 
+ 2. If the results don't make sense, why not?  
+ 
+ 3. Are there any big gaps in terms of indicators measured?
+ 
+ 4. Are there need to reshuffles of indicators/categories?
+ 
+---
+
+## Scenario 1: Arithmetic mean
+
+.pull-left[
+  
+]
+
+.pull-right[
+
+```{r}
+MVI1 <- f_build_index(coin = MVI, 
+                     agg_method = "a_amean", #   (arithmetic mean),
+                     max_winsorisation = params$max_winsorisation, 
+                     skew_thresh = params$skew_thresh , 
+                     kurt_thresh = params$kurt_thresh )
+ 
+f_plot_map2(coin = MVI1, 
+           dset = "Aggregated",
+           shp_path,
+           shp_name = params$shp_name , 
+           shp_ucode = params$shp_ucode )
+```
+
+]
+
+---
+
+## Scenario 2: Geometric mean
+.pull-left[
+  One issue to address when aggregating indicators is related to the concept of compensability. Namely the question is to know to what extent can we accept that the high score of an indicator should compensate the low score of another indicator? While the arithmetic mean has "perfect compensability", the geometric mean only allows [partial compensation](https://en.wikipedia.org/wiki/Inequality_of_arithmetic_and_geometric_means) between indicator scores.
+]
+
+.pull-right[
+```{r}
+MVI2 <- f_build_index(coin = MVI, 
+                     agg_method = "a_gmean", # (geometric mean),
+                     max_winsorisation = params$max_winsorisation, 
+                     skew_thresh = params$skew_thresh , 
+                     kurt_thresh = params$kurt_thresh )
+ 
+f_plot_map2(coin = MVI2, 
+           dset = "Aggregated",
+           shp_path ,
+           shp_name = params$shp_name , 
+           shp_ucode = params$shp_ucode )
+```
+
+]
+
+---
+
+## Scenario 3: Benefit of the Doubt
+.pull-left[
+ Weights are endogenously determined by the observed performances and benchmark is not based on theoretical bounds, but it's a linear combination of the observed best performances. Principle is easy to communicate: since we are not sure about the right weights, we look for "benefit of the doubt" weights (such that your overall relative performance index is as high as possible).
+]
+
+.pull-right[
+```{r}
+MVI3 <- f_build_index(coin = MVI, 
+                     agg_method = "a_bod", # (benefit of doubt via Compind package) 
+                     max_winsorisation = params$max_winsorisation, 
+                     skew_thresh = params$skew_thresh , 
+                     kurt_thresh = params$kurt_thresh )
+ 
+f_plot_map2(coin = MVI3, 
+           dset = "Aggregated",
+           shp_path ,
+           shp_name = params$shp_name , 
+           shp_ucode = params$shp_ucode )
+```
+
+]
+
+
+---
+
+## Scenario 4: Dendric method
+.pull-left[
+ Dendric method (also known as the Wroclaw Taxonomic Method ), originally developed at the University of Wroclaw, is based on the distance from a theoretical unit characterized by the best performance for all indicators considered. The final composite indicator is therefore based on the sum of euclidean distances from the ideal unit and normalized by a measure of variability of these distance (`mean + 2*std`).
+]
+
+.pull-right[
+```{r}
+MVI4 <- f_build_index(coin = MVI, 
+                     agg_method = "a_wroclaw", # (Wroclaw Taxonomic Method via Compind)
+                     max_winsorisation = 5,
+                     skew_thresh = 2,
+                     kurt_thresh = 3.5)
+ 
+f_plot_map2(coin = MVI4, 
+           dset = "Aggregated",
+           shp_path ,
+           shp_name = params$shp_name , 
+           shp_ucode = params$shp_ucode )
+```
+
+]
+
+
+---
+
+## Deliberation

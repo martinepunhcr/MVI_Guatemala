@@ -2,7 +2,7 @@
 % Please edit documentation in R/f_export_report.R
 \name{f_export_report}
 \alias{f_export_report}
-\title{Title}
+\title{Generate an html technical report}
 \usage{
 f_export_report(datafolder, data, shp, folder = "Report")
 }
@@ -20,11 +20,6 @@ Folder will be created if it does not exist}
 nothing the file for the report is generated
 }
 \description{
-Title
-}
-\details{
-Generate an html technical report
-
 This functions provides a quick access to a basic report to generate severity index 
 according multiple scenario
 }

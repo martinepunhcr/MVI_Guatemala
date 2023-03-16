@@ -89,6 +89,6 @@ f_plot_map <- function(coin,
     leaflet::addLegend(pal = pal, values = ~Indicator, opacity = 0.7, title = NULL,
               position = "bottomright")
 
-  mp
+  return(mp)
     
 }
