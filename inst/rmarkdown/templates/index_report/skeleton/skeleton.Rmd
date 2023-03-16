@@ -163,9 +163,6 @@ MVI <- f_build_index(MVI)
 The details of how each indicator was treated are shown in the following table.
 
 ```{r}
-source(here::here("R/old","helpers.R")) |>
-  suppressMessages()
-
 MVI$Analysis$Treated$Dets_Table |>
   tidy_treatment_details() |>
   filter(!Pass_0) |>

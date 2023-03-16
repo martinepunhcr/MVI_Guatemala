@@ -6,6 +6,11 @@
 #' with cells highlighted by an equivalently sized logical df `Xh`.
 #' This is used for displaying the output of `f_analyse_indicators()`.
 #' 
+#' @param Xd table with input 
+#' @param Xh cells highlighted by an equivalently sized logical
+#' @param table_caption  add caption to able if needed 
+#' @param highlight_colour = "#ffc266"
+#' 
 #' @return A DT object
 #' 
 #' @export

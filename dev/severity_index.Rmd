@@ -353,7 +353,7 @@ test_that("f_print_coin works", {
 #'
 #' Plots the structure of the index using a sunburst plot using **plotly**.
 #'
-#' @param COIN coin object
+#' @param coin COIN object
 #' @param seg_cols A character vector of colour codes, one for each segment in the plot. The length of this
 #' vector must be equal to the number of segments, i.e. the sum of the number of indicators and aggregates
 #' in each level. 
@@ -600,6 +600,90 @@ test_that("f_analyse_indicators works", {
   expect_true(inherits(f_analyse_indicators, "function")) 
 })
 ```
+
+
+## Treatment details
+    
+```{r function-tidy_treatment_details}
+#' Data Treatment Pipeline
+#' 
+#' Tidy the results of data treatment
+#' 
+#' @param X corresponding to a specific part of the COIN 
+#'          MVI$Analysis$Treated$Dets_Table
+#' 
+#' @importFrom COINr round_df
+#' 
+#' @return a summary table
+#' 
+#' @export
+tidy_treatment_details <- function(X){
+
+  X <- dplyr::rename(
+    X,
+    "Pass_0" = "check_SkewKurt0.Pass",
+    "Skew_0" = "check_SkewKurt0.Skew",
+    "Kurt_0" = "check_SkewKurt0.Kurt",
+    "Pass_1" = "check_SkewKurt1.Pass",
+    "Skew_1" = "check_SkewKurt1.Skew",
+    "Kurt_1" = "check_SkewKurt1.Kurt"
+  )
+
+  # General column for declaring the data treatment performed.
+  # Declare number of Winsorised points.
+  X$Treatment <- ifelse(X$Pass_0, "-", paste0("Win: ", X$winsorise.nwin))
+
+  # Fill in the blanks for pass, skew and kurt ----
+
+  # If indicator passed at 0, it must have passed at 1
+  X$Pass_1 <- X$Pass_1 | X$Pass_0
+
+  # Bring over skew and kurtosis values from 0 to 1
+  #  for indicators that passed at 0
+  X$Skew_1[X$Pass_0] <- X$Skew_0[X$Pass_0]
+  X$Kurt_1[X$Pass_0] <- X$Kurt_0[X$Pass_0]
+
+
+  # If the log transformation is invoked anywhere ----
+  # We have to make some further adjustments
+
+  if (!is.null(X$check_SkewKurt2.Pass)) {
+
+    # record instances of Log transformation
+    X$Treatment <- ifelse(X$Pass_1, X$Treatment, "Log")
+
+    # Bring any skew, kurt and pass from 2 to 1
+    X$Skew_1[!X$Pass_1] <- X$check_SkewKurt2.Skew[!X$Pass_1]
+    X$Kurt_1[!X$Pass_1] <- X$check_SkewKurt2.Kurt[!X$Pass_1]
+
+    X$Pass_1 <- X$Pass_1 | X$check_SkewKurt2.Pass
+
+  }
+
+  #----
+
+  X <- X[c("iCode", "Pass_0", "Skew_0", "Kurt_0", "Treatment", "Pass_1", "Skew_1", "Kurt_1")]
+
+  # round to 2 decimal places
+  COINr::round_df(X, 2)
+
+}
+
+```
+  
+```{r example-tidy_treatment_details}
+#tidy_treatment_details()
+```
+  
+```{r tests-tidy_treatment_details}
+test_that("tidy_treatment_details works", {
+  expect_true(inherits(tidy_treatment_details, "function")) 
+})
+```
+  
+
+
+
   
 ## Gather correlations
     
@@ -705,6 +789,11 @@ test_that("f_display_indicator_analysis works", {
 #' Generic function for creating an interactive table with input df `Xd`, and
 #' with cells highlighted by an equivalently sized logical df `Xh`.
 #' This is used for displaying the output of `f_analyse_indicators()`.
+#' 
+#' @param Xd table with input 
+#' @param Xh cells highlighted by an equivalently sized logical
+#' @param table_caption  add caption to able if needed 
+#' @param highlight_colour = "#ffc266"
 #' 
 #' @return A DT object
 #' 
@@ -991,7 +1080,8 @@ test_that("a_wroclaw works", {
 #' @param coin The coin
 #' @export
 #' 
-#' @noRd
+#' @return a coin
+#'  
 get_solo_groups <- function(coin){
   imeta <- coin$Meta$Ind
   parents <- imeta$Parent[!is.na(imeta$Parent)]
@@ -1204,7 +1294,7 @@ test_that("f_display_results_table works", {
 #' @param coin The coin
 #' @param dset Name of data set in the coin from which to extract the indicator/aggregate to plot
 #' @param iCode Code of indicator within `"dset"` to plot
-#' @param shp_path Assume a shapefile with `"ADM2_PCODE"` being the main key to use\
+#' @param shp_path Assume a shapefile with `"ADM2_PCODE"` being the main key to use 
 #'                with the default `"admin2Pcode"` within the indicator main excel file
 #'                
 #'                 Guatemala example is currently at `"./inst/shp/gtm_admbnda_adm2_ocha_conred_20190207.shp"`
@@ -1284,9 +1374,7 @@ MVI <- f_build_index(MVI)
 f_plot_map(coin = MVI, 
            dset = "Aggregated",
            iCode = "MVI", 
-           shp_path = shp_path  )
-## when using ut your shape in the folder ---
-         #  shp_path = here::here("inst/data-input", "gtm_admbnda_adm2_ocha_conred_20190207.shp")           )
+           shp_path = shp_path  ) 
 ```
   
 ```{r tests-f_plot_map}
@@ -1301,18 +1389,12 @@ test_that("f_plot_map works", {
 ```{r function-f_plot_map2}
 #' Plot map with main index and sub index
 #' 
-#' This second version of the summary map display the main severity index 
-#'  together with all its sub-dimensions each them presented as selected layers
-#'  
-#' The infobox present the index (or subindex) value together with the rank 
-#' 
-#' Plots an interactive choropleth map using supplied shape files. The shapefile is 
-#' automatically simplified so that the resulting html viz remains light
-#' 
-#' This is powered by the leaflet package.
-#' 
-#' Note we will need some checks here to make sure the shape file is compatible with the
-#' data. This can be dealt with in the app phase.
+#' @description Plots an interactive choropleth map using supplied shape files and powered by 
+#' the leaflet package. This second version of the summary map display the main 
+#' severity index together with all its sub-dimensions each them presented as 
+#' selected layers. The infobox present the index (or subindex) value together 
+#' with the rank. The shapefile is automatically simplified so that the resulting
+#'  html viz remains light.
 #' 
 #' @param coin The coin
 #' 
@@ -1327,19 +1409,22 @@ test_that("f_plot_map works", {
 #' 
 #' @param shp_ucode name of corresponding admincode matching  with ucode 
 #'    in the shapefile  for instance `"ADM2_PCODE"` being the main key to use
-#'                 
-#'                 
+#'                                  
 #' @param dTolerance  1000 per default - parameter to simplify the shapefile so that the report is not too heavy... 
-#' @param palette color palette for the map - selected as "inferno" per default to be inlusive of the 10% population of color blind people                 
+#' 
+#' @param palette color palette for the map - selected as "inferno" per default
+#'        to be inclusive of color blind people                 
 #' 
 #' @importFrom COINr get_data
 #' @importFrom sf read_sf st_simplify
-#' @importFrom leaflet leaflet labelOptions highlightOptions addTiles addLegend
-#' @importFrom dplyr rename select  left_join
+#' @importFrom leaflet leaflet labelOptions 
+#'                highlightOptions addTiles addLegend layersControlOptions
+#' @importFrom dplyr rename select  left_join any_of
 #' 
 #' @return a leaflet object
 #' 
 #' @export
+
 f_plot_map2 <- function(coin, 
                        dset = "Aggregated",
                        shp_path,
@@ -1348,7 +1433,10 @@ f_plot_map2 <- function(coin,
                        dTolerance = 1000,
                        palette= "inferno"){
   
-# read shape file
+  library(leaflet)
+  requireNamespace("leaflet")
+  requireNamespace("rgdal")
+  # read shape file
   shp0 <-sf::read_sf(shp_path) |>
          dplyr::rename("shp_name"= any_of(shp_name) ,
                         "shp_ucode"= any_of(shp_ucode)  ) |>
@@ -1400,7 +1488,6 @@ f_plot_map2 <- function(coin,
                              bins = 7)
   
   }
-  library(leaflet)
     m <- leaflet::leaflet() |>
       leaflet::addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite")
     ## Add layers in a loop ----------------------------------
@@ -1449,6 +1536,7 @@ f_plot_map2 <- function(coin,
 ```
   
 ```{r example-f_plot_map2}
+
 MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
                                             package = "BuildIndex") )
 
@@ -1464,9 +1552,7 @@ f_plot_map2(coin = MVI,
            dset = "Aggregated",
            shp_path = shp_path,
            shp_name = shp_name,
-           shp_ucode = shp_ucode )
-## when using ut your shape in the folder ---
-         #  shp_path = here::here("inst/data-input", "gtm_admbnda_adm2_ocha_conred_20190207.shp")           )
+           shp_ucode = shp_ucode )      
 ```
   
 ```{r tests-f_plot_map2}
@@ -1963,10 +2049,14 @@ f_export_report <- function(datafolder,
 ```
   
 ```{r example-f_export_report}
-# f_export_report(  datafolder = "data-raw", ## This is the default folder where to put you data in
-#                   data = "data_module-input.xlsx", ## Name of the data file
-#                  shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", ## name of the shapefile to create the map
-#                  folder = "Report")
+# f_export_report(  
+    ## This is the default folder where to put you data in
+    #      datafolder = "data-raw",
+    ## Name of the data file
+    #      data = "data_module-input.xlsx",
+    ## name of the shapefile to create the map
+    #      shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", 
+    #      folder = "Report")
 ```
   
 ```{r tests-f_export_report}
@@ -1992,7 +2082,8 @@ test_that("f_export_report works", {
 #' 
 #' @param datafolder "data-raw" ## This is the default folder where to put you data in
 #' @param data "data_module-input.xlsx" ## Name of the data file
-#' @param shp "gtm_admbnda_adm2_ocha_conred_20190207.shp" ## name of the shapefile to create the map
+#' @param shp name of the shapefile to create the map
+#'           for instance "gtm_admbnda_adm2_ocha_conred_20190207.shp" 
 #' @param folder folder within your project where to put the generated prez. 
 #' Folder will be created if it does not exist
 #' 
@@ -2012,9 +2103,7 @@ f_export_prez <- function(datafolder,
                                    folder = "Report") {
   
   
-    datafolder: "data-raw" ## This is the default folder where to put you data in
-  data: "data_module-input.xlsx" ## Name of the data file
-  shp: "gtm_admbnda_adm2_ocha_conred_20190207.shp" ## name of the shapefile to create the map
+
   
   ## Create the outfolder if it does not exist
   output_dir <- paste0(getwd(),"/",folder)
@@ -2022,7 +2111,8 @@ f_export_prez <- function(datafolder,
    
   
   rmarkdown::render(
-    system.file("rmarkdown/templates/index_prez/skeleton/skeleton.Rmd", package = "BuildIndex"),
+    system.file("rmarkdown/templates/index_prez/skeleton/skeleton.Rmd", 
+                package = "BuildIndex"),
     output_file = here::here(folder, paste0('SeverityIndex_prez-',   '.html') ),
     params = list(datafolder = datafolder,
                             data = data,
@@ -2032,10 +2122,15 @@ f_export_prez <- function(datafolder,
 ```
   
 ```{r example-f_export_prez}
-# f_export_prez(  datafolder = "data-raw", ## This is the default folder where to put you data in
-#                   data = "data_module-input.xlsx", ## Name of the data file
-#                  shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", ## name of the shapefile to create the map
-#                  folder = "Report")
+
+# f_export_prez( 
+    ## This is the default folder where to put you data in
+    #      datafolder = "data-raw",
+    ## Name of the data file
+    #      data = "data_module-input.xlsx",
+    ## name of the shapefile to create the map
+    #      shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", 
+    #      folder = "Report")
 ```
   
 ```{r tests-f_export_prez}

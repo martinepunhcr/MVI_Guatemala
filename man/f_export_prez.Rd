@@ -11,7 +11,8 @@ f_export_prez(datafolder, data, shp, folder = "Report")
 
 \item{data}{"data_module-input.xlsx" ## Name of the data file}
 
-\item{shp}{"gtm_admbnda_adm2_ocha_conred_20190207.shp" ## name of the shapefile to create the map}
+\item{shp}{name of the shapefile to create the map
+for instance "gtm_admbnda_adm2_ocha_conred_20190207.shp"}
 
 \item{folder}{folder within your project where to put the generated prez. 
 Folder will be created if it does not exist}
@@ -24,8 +25,13 @@ This functions provides a quick access to a basic prez to generate severity inde
 according multiple scenario
 }
 \examples{
-# f_export_prez(  datafolder = "data-raw", ## This is the default folder where to put you data in
-#                   data = "data_module-input.xlsx", ## Name of the data file
-#                  shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", ## name of the shapefile to create the map
-#                  folder = "Report")
+
+# f_export_prez( 
+    ## This is the default folder where to put you data in
+    #      datafolder = "data-raw",
+    ## Name of the data file
+    #      data = "data_module-input.xlsx",
+    ## name of the shapefile to create the map
+    #      shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", 
+    #      folder = "Report")
 }

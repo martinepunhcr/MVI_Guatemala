@@ -14,7 +14,8 @@
 #' 
 #' @param datafolder "data-raw" ## This is the default folder where to put you data in
 #' @param data "data_module-input.xlsx" ## Name of the data file
-#' @param shp "gtm_admbnda_adm2_ocha_conred_20190207.shp" ## name of the shapefile to create the map
+#' @param shp name of the shapefile to create the map
+#'           for instance "gtm_admbnda_adm2_ocha_conred_20190207.shp" 
 #' @param folder folder within your project where to put the generated prez. 
 #' Folder will be created if it does not exist
 #' 
@@ -29,19 +30,22 @@
 #'
 
 #' @examples
-#' # f_export_prez(  datafolder = "data-raw", ## This is the default folder where to put you data in
-#' #                   data = "data_module-input.xlsx", ## Name of the data file
-#' #                  shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", ## name of the shapefile to create the map
-#' #                  folder = "Report")
+#' 
+#' # f_export_prez( 
+#'     ## This is the default folder where to put you data in
+#'     #      datafolder = "data-raw",
+#'     ## Name of the data file
+#'     #      data = "data_module-input.xlsx",
+#'     ## name of the shapefile to create the map
+#'     #      shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", 
+#'     #      folder = "Report")
 f_export_prez <- function(datafolder,
                             data,
                             shp,
                                    folder = "Report") {
   
   
-    datafolder: "data-raw" ## This is the default folder where to put you data in
-  data: "data_module-input.xlsx" ## Name of the data file
-  shp: "gtm_admbnda_adm2_ocha_conred_20190207.shp" ## name of the shapefile to create the map
+
   
   ## Create the outfolder if it does not exist
   output_dir <- paste0(getwd(),"/",folder)
@@ -49,7 +53,8 @@ f_export_prez <- function(datafolder,
    
   
   rmarkdown::render(
-    system.file("rmarkdown/templates/index_prez/skeleton/skeleton.Rmd", package = "BuildIndex"),
+    system.file("rmarkdown/templates/index_prez/skeleton/skeleton.Rmd", 
+                package = "BuildIndex"),
     output_file = here::here(folder, paste0('SeverityIndex_prez-',   '.html') ),
     params = list(datafolder = datafolder,
                             data = data,

@@ -24,8 +24,12 @@ This functions provides a quick access to a basic report to generate severity in
 according multiple scenario
 }
 \examples{
-# f_export_report(  datafolder = "data-raw", ## This is the default folder where to put you data in
-#                   data = "data_module-input.xlsx", ## Name of the data file
-#                  shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", ## name of the shapefile to create the map
-#                  folder = "Report")
+# f_export_report(  
+    ## This is the default folder where to put you data in
+    #      datafolder = "data-raw",
+    ## Name of the data file
+    #      data = "data_module-input.xlsx",
+    ## name of the shapefile to create the map
+    #      shp = "gtm_admbnda_adm2_ocha_conred_20190207.shp", 
+    #      folder = "Report")
 }

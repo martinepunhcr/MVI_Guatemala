@@ -13,7 +13,7 @@ f_plot_map(coin, dset = "Aggregated", iCode = "MVI", shp_path)
 
 \item{iCode}{Code of indicator within `"dset"` to plot}
 
-\item{shp_path}{Assume a shapefile with `"ADM2_PCODE"` being the main key to use\
+\item{shp_path}{Assume a shapefile with `"ADM2_PCODE"` being the main key to use 
 with the default `"admin2Pcode"` within the indicator main excel file
 
  Guatemala example is currently at `"./inst/shp/gtm_admbnda_adm2_ocha_conred_20190207.shp"`}
@@ -42,7 +42,5 @@ MVI <- f_build_index(MVI)
 f_plot_map(coin = MVI, 
            dset = "Aggregated",
            iCode = "MVI", 
-           shp_path = shp_path  )
-## when using ut your shape in the folder ---
-         #  shp_path = here::here("inst/data-input", "gtm_admbnda_adm2_ocha_conred_20190207.shp")           )
+           shp_path = shp_path  ) 
 }

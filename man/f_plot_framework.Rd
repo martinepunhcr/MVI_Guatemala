@@ -7,11 +7,11 @@
 f_plot_framework(coin, seg_cols = NULL)
 }
 \arguments{
+\item{coin}{COIN object}
+
 \item{seg_cols}{A character vector of colour codes, one for each segment in the plot. The length of this
 vector must be equal to the number of segments, i.e. the sum of the number of indicators and aggregates
 in each level.}
-
-\item{COIN}{coin object}
 }
 \value{
 fig as a plotly plot

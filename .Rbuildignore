@@ -1,3 +1,14 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^MVI_Guatemala\.Rproj$
+^docs$
+^_pkgdown\.yml$
+^\.github$
+^test/testthat/test\.csv$
+^README\.Rmd$
+^README-.*\.png$
+^inst\archive$
+^inst\data_input$
+^docs$
+^dev$
+^data-raw$

@@ -4,7 +4,7 @@
 #'
 #' Plots the structure of the index using a sunburst plot using **plotly**.
 #'
-#' @param COIN coin object
+#' @param coin COIN object
 #' @param seg_cols A character vector of colour codes, one for each segment in the plot. The length of this
 #' vector must be equal to the number of segments, i.e. the sum of the number of indicators and aggregates
 #' in each level. 

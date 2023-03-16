@@ -6,6 +6,15 @@
 \usage{
 f_highlight_DT(Xd, Xh, table_caption = NULL, highlight_colour = "#ffc266")
 }
+\arguments{
+\item{Xd}{table with input}
+
+\item{Xh}{cells highlighted by an equivalently sized logical}
+
+\item{table_caption}{add caption to able if needed}
+
+\item{highlight_colour}{= "#ffc266"}
+}
 \value{
 A DT object
 }

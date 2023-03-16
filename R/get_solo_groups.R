@@ -7,7 +7,8 @@
 #' @param coin The coin
 #' @export
 #' 
-#' @noRd
+#' @return a coin
+#'  
 #' @examples
 #' #
 get_solo_groups <- function(coin){

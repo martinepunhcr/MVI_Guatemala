@@ -2,18 +2,12 @@
 
 #' Plot map with main index and sub index
 #' 
-#' This second version of the summary map display the main severity index 
-#'  together with all its sub-dimensions each them presented as selected layers
-#'  
-#' The infobox present the index (or subindex) value together with the rank 
-#' 
-#' Plots an interactive choropleth map using supplied shape files. The shapefile is 
-#' automatically simplified so that the resulting html viz remains light
-#' 
-#' This is powered by the leaflet package.
-#' 
-#' Note we will need some checks here to make sure the shape file is compatible with the
-#' data. This can be dealt with in the app phase.
+#' @description Plots an interactive choropleth map using supplied shape files and powered by 
+#' the leaflet package. This second version of the summary map display the main 
+#' severity index together with all its sub-dimensions each them presented as 
+#' selected layers. The infobox present the index (or subindex) value together 
+#' with the rank. The shapefile is automatically simplified so that the resulting
+#'  html viz remains light.
 #' 
 #' @param coin The coin
 #' 
@@ -28,20 +22,24 @@
 #' 
 #' @param shp_ucode name of corresponding admincode matching  with ucode 
 #'    in the shapefile  for instance `"ADM2_PCODE"` being the main key to use
-#'                 
-#'                 
+#'                                  
 #' @param dTolerance  1000 per default - parameter to simplify the shapefile so that the report is not too heavy... 
-#' @param palette color palette for the map - selected as "inferno" per default to be inlusive of the 10% population of color blind people                 
+#' 
+#' @param palette color palette for the map - selected as "inferno" per default
+#'        to be inclusive of color blind people                 
 #' 
 #' @importFrom COINr get_data
 #' @importFrom sf read_sf st_simplify
-#' @importFrom leaflet leaflet labelOptions highlightOptions addTiles addLegend
-#' @importFrom dplyr rename select  left_join
+#' @importFrom leaflet leaflet labelOptions 
+#'                highlightOptions addTiles addLegend layersControlOptions
+#' @importFrom dplyr rename select  left_join any_of
 #' 
 #' @return a leaflet object
 #' 
 #' @export
+
 #' @examples
+#' 
 #' MVI <- f_data_input(file_path = system.file("data_input/data_module-input.xlsx",
 #'                                             package = "BuildIndex") )
 #' 
@@ -57,9 +55,7 @@
 #'            dset = "Aggregated",
 #'            shp_path = shp_path,
 #'            shp_name = shp_name,
-#'            shp_ucode = shp_ucode )
-#' ## when using ut your shape in the folder ---
-#'          #  shp_path = here::here("inst/data-input", "gtm_admbnda_adm2_ocha_conred_20190207.shp")           )
+#'            shp_ucode = shp_ucode )      
 f_plot_map2 <- function(coin, 
                        dset = "Aggregated",
                        shp_path,
@@ -68,7 +64,10 @@ f_plot_map2 <- function(coin,
                        dTolerance = 1000,
                        palette= "inferno"){
   
-# read shape file
+  library(leaflet)
+  requireNamespace("leaflet")
+  requireNamespace("rgdal")
+  # read shape file
   shp0 <-sf::read_sf(shp_path) |>
          dplyr::rename("shp_name"= any_of(shp_name) ,
                         "shp_ucode"= any_of(shp_ucode)  ) |>
@@ -120,7 +119,6 @@ f_plot_map2 <- function(coin,
                              bins = 7)
   
   }
-  library(leaflet)
     m <- leaflet::leaflet() |>
       leaflet::addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite")
     ## Add layers in a loop ----------------------------------
