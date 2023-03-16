@@ -71,15 +71,15 @@
 <div class="section level2">
 <h2 id="problem-statement">Problem Statement<a class="anchor" aria-label="anchor" href="#problem-statement"></a>
 </h2>
-<p>To be able to reach, properly assess and understand local dynamics, vulnerabilities and capacities of the displaced and host populations alike, humanitarian organisations are increasingly using sub-national <a href="https://www.humanitarianlibrary.org/collection/implementing-area-based-approaches" class="external-link">Area Based Approach</a>. Area based approaches define “<em>an area, rather than a sector or target group, as a primary entry point</em>”. Such approach is particularly appropriate when residents in an affected area face complex, inter-related and multisectoral needs, resulting in risk of forced displacement. Severity index informs therefore comparison of needs across geographic areas. The challenge is to summarize and condense the information of a plurality of underlying indicators into a single measure, in a way that accurately reflects the underlying concept.</p>
+<p>To be able to reach, properly assess and understand local dynamics, vulnerabilities and capacities of the displaced and host populations alike, humanitarian organisations are increasingly using sub-national <a href="https://www.humanitarianlibrary.org/collection/implementing-area-based-approaches" class="external-link">Area Based Approach</a>. Area based approaches define “<em>an area, rather than a sector or target group, as a primary entry point</em>”. Such approach is particularly appropriate when residents in an affected area face complex, inter-related and multisectoral needs, resulting in risk of forced displacement. Severity index informs therefore comparison of needs across geographic areas, which can help to prioritise interventions. The challenge is to summarize and condense the information of a plurality of underlying indicators into a single measure, in a way that accurately reflects the underlying concept.</p>
 <p>However the calculation of Humanitarian Severity Index comes with challenges:</p>
 <blockquote>
 <p>“we end up relying on a lot of expert judgment, which in effect means that we’re faking it–we have a process and looks like it’s very rigorous, and in the end is just being done by people’s…assumptions.”</p>
 </blockquote>
-<p>Conceptual and statistical flaws during the creation of Humanitarian Severity Index can greatly limit its usefulness. <strong>While there are no magic formula to establish a sigle right way to calculte the index, there are definitely risks to make mistakes when selecting, treating and aggregating data</strong>. The main challenge is therefore to allow for a process that will be based on the expert judgement but framed within a set of aggregation options where people assumptions will be balanced by quantitative data properly selected and treated in a fully auditable way.</p>
+<p>Conceptual and statistical flaws during the creation of Humanitarian Severity Index can greatly limit its usefulness. <strong>While there are no magic formula to establish a single right way to calculate the index, there are definitely risks to make mistakes when selecting, treating and aggregating data</strong>. The main challenge is therefore to allow for a process that will be based on the expert judgement but framed within a set of aggregation options where people assumptions will be balanced by quantitative data properly selected and treated in a fully auditable way.</p>
 </div>
 <div class="section level2">
-<h2 id="solution-a-guide-workflow">Solution: a guide workflow<a class="anchor" aria-label="anchor" href="#solution-a-guide-workflow"></a>
+<h2 id="solution-a-guided-workflow">Solution: a guided workflow<a class="anchor" aria-label="anchor" href="#solution-a-guided-workflow"></a>
 </h2>
 <p>An organized workflow to build <strong>severity index</strong>, aka a composite indicator in line with the commonly used tri-dimensional conceptual framework:</p>
 <ol style="list-style-type: decimal">
@@ -100,6 +100,7 @@
 <div class="section level3">
 <h3 id="id_1-source-sub-national-scale-data">1. Source sub-national scale data<a class="anchor" aria-label="anchor" href="#id_1-source-sub-national-scale-data"></a>
 </h3>
+<p>Create a github repository and start a wiki within your repository to document your data investigaion.</p>
 <p>There is an available <a href="https://github.com/martinepunhcr/MVI_Guatemala/wiki" class="external-link uri">https://github.com/martinepunhcr/MVI_Guatemala/wiki</a> to review the metadata of all indicators used in the Index</p>
 </div>
 <div class="section level3">
@@ -111,7 +112,7 @@
 <div class="section level3">
 <h3 id="id_3-create-project-in-rstudio">3. Create Project in Rstudio<a class="anchor" aria-label="anchor" href="#id_3-create-project-in-rstudio"></a>
 </h3>
-<p>Create a github repository Create a new project in Rstudio from the git. Then create a folder and put the required data file</p>
+<p>Create a new project in Rstudio from the git of your github repository. Then create a folder and put the required data file</p>
 <ul>
 <li><p><strong>datafolder</strong>: by default <code>"data-raw"</code> This is the default folder where to put you data in</p></li>
 <li><p><strong>data</strong>: Name of the data excel (.xlsx) file with the indicator main excel file - following precisely a standard template - see example <a href="https://github.com/martinepunhcr/MVI_Guatemala/raw/main/data-raw/data_module-input.xlsx" class="external-link">here</a>: one worksheet for the indicator and one worksheet for the documentation of aggregation</p></li>

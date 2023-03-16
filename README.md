@@ -4,16 +4,16 @@
 ## Problem Statement
 
 
-To be able to reach, properly assess and understand local dynamics, vulnerabilities and capacities of the displaced and host populations alike, humanitarian organisations are increasingly using sub-national [Area Based Approach](https://www.humanitarianlibrary.org/collection/implementing-area-based-approaches). Area based approaches define "*an area, rather than a sector or target group, as a primary entry point*". Such approach is particularly appropriate when residents in an affected area face complex, inter-related and multisectoral needs, resulting in risk of forced displacement. Severity index informs therefore comparison of needs across geographic areas. The challenge is to summarize and condense the information of a plurality of underlying indicators into a single measure, in a way that accurately reflects the underlying concept.
+To be able to reach, properly assess and understand local dynamics, vulnerabilities and capacities of the displaced and host populations alike, humanitarian organisations are increasingly using sub-national [Area Based Approach](https://www.humanitarianlibrary.org/collection/implementing-area-based-approaches). Area based approaches define "*an area, rather than a sector or target group, as a primary entry point*". Such approach is particularly appropriate when residents in an affected area face complex, inter-related and multisectoral needs, resulting in risk of forced displacement. Severity index informs therefore comparison of needs across geographic areas, which can help to prioritise interventions. The challenge is to summarize and condense the information of a plurality of underlying indicators into a single measure, in a way that accurately reflects the underlying concept.
 
 However the calculation of Humanitarian Severity Index comes with challenges: 
 
 > "we end up relying on a lot of expert judgment, which in effect means that we’re faking it--we have a process and looks like it’s very rigorous, and in the end is just being done by people’s...assumptions."
 
-Conceptual and statistical flaws during the creation of Humanitarian Severity Index can greatly limit its usefulness. __While there are no magic formula to establish a sigle right way to calculte the index, there are definitely risks to make mistakes when selecting, treating and aggregating data__. The main challenge is therefore to allow for a process that will be based on the expert judgement but framed within a set of aggregation options where people assumptions will be balanced by quantitative data properly selected and treated in a fully auditable way. 
+Conceptual and statistical flaws during the creation of Humanitarian Severity Index can greatly limit its usefulness. __While there are no magic formula to establish a single right way to calculate the index, there are definitely risks to make mistakes when selecting, treating and aggregating data__. The main challenge is therefore to allow for a process that will be based on the expert judgement but framed within a set of aggregation options where people assumptions will be balanced by quantitative data properly selected and treated in a fully auditable way. 
 
 
-## Solution: a guide workflow
+## Solution: a guided workflow
 
 
 An organized workflow to build __severity index__, aka a composite indicator in line with the commonly used tri-dimensional conceptual framework: 
@@ -35,6 +35,9 @@ The approach generates Transparency, Robustness & Accuracy as it follows the sta
 UNHCR Guatemala is building a composite indicator to assess the Severity of the 340 municipalities in the country. The main purpose of the index is to better prioritize the municipalities in which UNHCR should do Community-based Protection interventions. To reproduce the current, results:
 
 ### 1. Source sub-national scale data
+
+Create a github repository and start a wiki within your repository to document your data investigaion. 
+
 There is an available https://github.com/martinepunhcr/MVI_Guatemala/wiki to review the metadata of all indicators used in the Index
 
 ### 2. Install  
@@ -45,8 +48,7 @@ pak::pkg_install("martinepunhcr/MVI_Guatemala")
 
 ### 3. Create Project in Rstudio
 
-Create a github repository
-Create a new project in Rstudio from the git. 
+Create a new project in Rstudio from the git of your github repository. 
 Then create a folder and put the required data file
 
  * __datafolder__: by default `"data-raw"` This is the default folder where to put you data in  
